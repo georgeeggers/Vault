@@ -1,0 +1,11 @@
+local files
+audio playback
+use tauri sql db for local file storage
+multiple themes
+preload audio for transitions
+audio playing - get the progress bar working
+potential server util
+store to self hosted cloud
+share from cloud
+add multiple cloud addresses and whatnot
+login data for cloud files to protect unreleased

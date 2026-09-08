@@ -21,6 +21,7 @@
   "dependencies": {
     "@lucide/svelte": "^1.41.0",
     "@tauri-apps/cli": "^2.11.4",
+    "@tauri-apps/plugin-sql": "^2.4.1",
     "pocketbase": "^0.28.1",
     "svelte-spa-router": "^5.1.1"
   }

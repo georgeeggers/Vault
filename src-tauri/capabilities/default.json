@@ -6,6 +6,21 @@
     "main"
   ],
   "permissions": [
-    "core:default"
+    "core:default",
+    "sql:default",
+    "sql:allow-execute",
+    "sql:allow-close",
+    "sql:allow-select",
+    "store:default",
+    "store:allow-load",
+    "store:allow-save",
+    "store:allow-get",
+    "store:allow-set",
+    "core:window:default",
+    "core:window:allow-close",
+    "core:window:allow-minimize",
+    "core:window:allow-toggle-maximize",
+    "core:window:allow-maximize",
+    "core:window:allow-start-dragging"
   ]
 }

@@ -1,0 +1,42 @@
+export type Lyric = {
+    timestamp: number,
+    content: string,
+}
+
+export type Lyrics = {
+    lyricType: "untimed",
+    content: string,
+} | {
+    lyricType: "line",
+    content: Lyric[],
+} | {
+    lyricType: "word",
+    content: Lyric[],
+}
+
+export type SongDataOptions = {
+    lyrics?: Lyrics[],
+    bpm?: number,
+    tags?: string,
+}
+
+export type SongData = {
+    content: string,
+    containerId: string,
+    id: string,
+    name: string,
+    options?: SongDataOptions
+}
+
+export type DatabaseSongContainer = {
+    variations: string[],
+    selectedVariation: number,
+    id: string,
+}
+
+export type SongContainer = {
+    variations: SongData[],
+    selectedVariation: number,
+    collectionId: string,
+    id: string
+}

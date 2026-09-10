@@ -67,7 +67,7 @@
         box-sizing: border-box;
         align-items: center;
         padding-left: 10px;
-        background-color: var(--bgt);
+        background-color: var(--bg1);
         backdrop-filter: blur(1px);
     }
 
@@ -99,10 +99,15 @@
         align-items: center;
         justify-content: center;
         outline: none;
+        transition: background-color .25s;
     }
 
     .windowControlButton:hover {
-        background-color: var(--bg1);
+        background-color: var(--bg2);
+    }
+
+    .windowControlButton:hover * {
+        color: var(--text1);
     }
 
     .searchBarContainer {
@@ -128,13 +133,17 @@
         color: var(--text2);
     }
 
-    .searchBarContainer .svgWrapper {
+    .svgWrapper {
         color: var(--text5);
         transition: color .25s;
     }
 
+    .svgWrapper.active {
+        color: var(--text1);
+    }
+
     .searchBarContainer:hover, .searchBarContainer:has(input:focus) {
-        background-color: var(--bg1);
+        background-color: var(--bg2);
     }
 
     .searchBarContainer:hover .svgWrapper, .searchBarContainer:has(input:focus) .svgWrapper {
@@ -144,5 +153,7 @@
     .searchBarContainer input::placeholder {
         color: var(--text5) !important;
     }
+
+
 
 </style>

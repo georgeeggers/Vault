@@ -38,7 +38,7 @@ let selected = $state("");
         height: 100%;
         border-radius: calc(var(--border-radius) + 10px);
         padding: 10px;
-        background-color: var(--bg1);
+        background-color: var(--bg2);
         box-sizing: border-box;
     }
 
@@ -75,7 +75,7 @@ let selected = $state("");
         gap: 30px;
         justify-content: center;
         flex-wrap: wrap;
-        background-color: var(--bg1);
+        background-color: var(--bg2);
         border-radius: calc(var(--border-radius) + 10px);
         padding: 10px;
         box-sizing: border-box;

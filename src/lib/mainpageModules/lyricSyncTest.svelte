@@ -41,17 +41,6 @@ const processLyric = (index: number) => {
   }
 }
 
-const lyricTick = () => {
-  if(testLyrics.length > 0){
-    lyricIndex = 0;
-    const currentLyric = testLyrics[lyricIndex];
-
-    timeoutID = setTimeout(() => {
-      processLyric(lyricIndex);
-    }, currentLyric.time)
-  }
-}
-
 let targetDiv: HTMLDivElement | null = $state(null);
 
 let testNumber: number = $state(0);
@@ -87,38 +76,31 @@ const scrollToLyric = (index: number) => {
 
 
 
-<div class="uiMain">
-
-  <p>{lyricIndex}</p>
-  {#if testLyrics.length > 0}
-    <p>{testLyrics[testLyrics.length - 1].totalTime}</p>
-  {/if}
-  <div id="lyricDisplay" class='scrollOverflow' bind:this={targetDiv}>
-    {#each testLyrics as l, i}
-      <label for='jumpto_lyric_{i}' class='lyricContainer'>
-        <p id="lyric_{i}" class='{lyricIndex == i ? "active" : ""}'>{l.lyric}<i style='font-size: 10px;'>{l.totalTime}</i></p>
-      </label>
-      <button class='invis' id='jumpto_lyric_{i}' onclick={() => startLyricSync(l.totalTime)}>bleh</button>
-    {/each}
-  </div>
-
-  <input bind:value={testNumber}>
-  <button class='btn main' onclick={() => startLyricSync(testNumber)}>Process</button>
+<div id="lyricDisplay" class='scrollOverflow' bind:this={targetDiv}>
+  {#each testLyrics as l, i}
+    <label for='jumpto_lyric_{i}' class='lyricContainer'>
+      <p id="lyric_{i}" class='{lyricIndex == i ? "active" : ""}'>{l.lyric}<i style='font-size: 10px;'>{l.totalTime}</i></p>
+    </label>
+    <button class='invis' id='jumpto_lyric_{i}' onclick={() => startLyricSync(l.totalTime)}>bleh</button>
+  {/each}
 </div>
+
+<input bind:value={testNumber}>
+<button class='btn main' onclick={() => startLyricSync(testNumber)}>Process</button>
+
+
 
 <style>
   #lyricDisplay {
-    width: fit-content;
-    height: fit-content;
-    max-height: 600px;
-    max-width: 600px;
-    background-color: var(--bg2);
-    border-radius: 15px;
+    width: 100%;
+    background-color: var(--bg1);
+    border-radius: var(--border-radius);
     display: flex;
     align-items: center;
     flex-direction: column;
     padding: 10px;
     box-sizing: border-box;
+    min-height: 450px;
   }
 
   #lyricDisplay p {

@@ -1,0 +1,14 @@
+Main page is essentially a big collection of nodes
+
+Project view
+ | [ ] Display all different projects user has (singles and multis)
+ | [ ] Display total time, cover art, project name, and # of songs
+Discography view
+ | [ ] display all user songs
+ | [ ] have a more standard music-player-esq layout, with each song listed sequentially based on upload date
+Lyric View
+ | [ ] If current playing song has lyrics, display them in the lyric node
+ | [ ] If not, act as a shortcut to go to lyric stager
+Favorites or pinned
+ | [ ] Pin certain albums or songs or whatever
+ | [ ] Maybe use a bento-style layout for these. Probably gonna have to generate this somehow with javascript

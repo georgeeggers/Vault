@@ -2,7 +2,6 @@
     import { Home, Maximize, Minimize, Minus, Search, Settings2, Summary, X } from "@lucide/svelte";
     import { getCurrentWindow } from "@tauri-apps/api/window";
     import { replace } from "svelte-spa-router";
-    import Breadcrumb from "./modules/Breadcrumb.svelte";
     import { appState } from "../backend/appState.svelte";
     const window = getCurrentWindow();
 
@@ -66,23 +65,18 @@
         cursor: pointer;
         box-sizing: border-box;
         align-items: center;
-        padding-left: 10px;
+        padding: 10px;
         background-color: var(--bg1);
         backdrop-filter: blur(1px);
     }
 
-    .breadcrumbContainer {
-        margin-left: 40px;
-        margin-right: 40px;
-    }
-
     .locationButton {
-        width: 40px;
-        height: 40px;
+        width: 45px;
+        height: 45px;
         display: flex;
         align-items: center;
         justify-content: center;
-        border-radius: 20px;
+        border-radius: var(--border-radius);
         background: none;
         border: none;
         cursor: pointer;
@@ -94,7 +88,7 @@
         cursor: pointer;
         min-width: 45px;
         width: 45px;
-        height: 100%;
+        height: 45px;
         display: flex;
         align-items: center;
         justify-content: center;
@@ -112,8 +106,8 @@
 
     .searchBarContainer {
         width: 400px;
-        height: calc(100% - 10px);
-        border-radius: 100px;
+        height: 100%;
+        border-radius: var(--border-radius);
         display: flex;
         align-items: center;
         padding: 0px 15px 0px 15px;
@@ -136,10 +130,6 @@
     .svgWrapper {
         color: var(--text5);
         transition: color .25s;
-    }
-
-    .svgWrapper.active {
-        color: var(--text1);
     }
 
     .searchBarContainer:hover, .searchBarContainer:has(input:focus) {

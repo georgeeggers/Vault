@@ -104,7 +104,7 @@ const scrollToLyric = (index: number) => {
   }
 
   #lyricDisplay p {
-    color: var(--text5);
+    color: var(--text7);
     font-size: 30px;
   }
 
@@ -117,6 +117,7 @@ const scrollToLyric = (index: number) => {
 
   .lyricContainer:hover *:not(.active){
     color: var(--text3) !important;
+    text-decoration: underline;
   }
 
   .active {

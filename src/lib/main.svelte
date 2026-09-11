@@ -1,5 +1,6 @@
 <script>
-    import LyricSyncTest from "./mainpageModules/lyricSyncTest.svelte";
+    import { SELECTED_SONG } from "../backend/dev.svelte";
+import LyricSyncTest from "./mainpageModules/lyricSyncTest.svelte";
     import ProjectView from "./mainpageModules/projectView.svelte";
     import YourVault from "./mainpageModules/yourVault.svelte";
 
@@ -18,7 +19,7 @@
 
     <div class="nowPlayingContainer">
         <div class="nowPlaying">
-            <img src='/ratherbdead.png' alt='bleh'>
+            <img src='{SELECTED_SONG}' alt='bleh'>
         </div>
     </div>
 

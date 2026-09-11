@@ -1,4 +1,5 @@
 <script lang="ts">
+    import { Ellipsis } from "@lucide/svelte";
     import { TEST_DATA } from "../../backend/dev.svelte";
 
 </script>
@@ -21,8 +22,14 @@
                     <div class="songDataText">
                         <p class='text1'>Example song</p>
                         <p class='text2'>67s</p>
-
                     </div>
+
+                    <button class='songDataButton'>
+                        <div class="svgWrapper">
+                            <Ellipsis size=20 />
+                        </div>
+                    </button>
+
                 </div>
             </div>
         {/each}
@@ -54,10 +61,16 @@
         flex-direction: row;
         width: 100%;
         align-items: center;
-        padding-left: 10px;
+        padding: 0px 10px 0px 10px;
         transition: background-color .25s;
     }
 
+    .songDataButton {
+        background: none;
+        border: none;
+        margin-left: auto;
+        cursor: pointer;
+    }
 
     .songDataContainer {
         width: 100%;
@@ -71,13 +84,14 @@
         cursor: pointer;
     }
 
-    .songDataContainer > p {
+    .songDataContainer > p, .songDataButton * {
         color: var(--text5);
         font-size: 16px;
         transition: color .25s;
     }
 
-    .songDataContainer:hover > p {
+
+    .songDataContainer:hover > p, .songDataContainer:hover .songDataButton * {
         color: var(--text1);
     }
 
@@ -85,8 +99,12 @@
         background-color: var(--bg2);
     }
 
-    .playing > p {
+    .playing > p{
         color: var(--main5) !important;
+    }
+
+    .playing .songDataButton * {
+        color: var(--text1) !important;
     }
 
     .playing .songData {

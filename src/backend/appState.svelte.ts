@@ -1,3 +1,4 @@
 export const appState = $state({
-    searchTerm: ""
+    searchTerm: "",
+    playing: true,
 })

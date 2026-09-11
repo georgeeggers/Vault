@@ -67,7 +67,7 @@
         align-items: center;
         padding: 10px;
         background-color: var(--bg1);
-        backdrop-filter: blur(1px);
+        border-bottom: 1px solid var(--bg2);
     }
 
     .locationButton {

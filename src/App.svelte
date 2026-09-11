@@ -4,6 +4,8 @@
     import Topbar from "./lib/topbar.svelte";
 
     import { routes } from "./routes.svelte";
+    import { appState } from "./backend/appState.svelte";
+    import Playbar from "./lib/playbar.svelte";
 
 </script>
 
@@ -13,7 +15,7 @@
     <Topbar />
   </div>
 
-  <div class="contentArea">
+  <div class="contentArea" style="{appState.playing ? "height: calc(100% - 160px);" : ""}">
   
     <div class="mainContentContainer">
       <Router {routes} />
@@ -21,9 +23,21 @@
 
   </div>
 
+  {#if appState.playing}
+    <div class="playbarContainer">
+      <Playbar />
+    </div>
+  {/if}
+
 </div>
 
 <style>
+
+  .playbarContainer {
+    width: 100%;
+    height: 100px;
+    min-height: 100px;
+  }
 
   .mainContentContainer {
     width: 100%;
@@ -46,15 +60,7 @@
     height: calc(100% - 60px);
     width: 100%;
     display: flex;
-    flex-direction: row;
     box-sizing: border-box;
-  }
-
-  .sidebarContainer {
-    height: 100%;
-    display: flex;
-    box-sizing: border-box;
-    width: 300px;
   }
 
 </style>

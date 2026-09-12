@@ -6,6 +6,9 @@
     import { routes } from "./routes.svelte";
     import { appState } from "./backend/appState.svelte";
     import Playbar from "./lib/playbar.svelte";
+    import { notifications } from "./backend/appUtils.svelte";
+    import { fly } from "svelte/transition";
+    import { X } from "@lucide/svelte";
 
 </script>
 
@@ -29,6 +32,23 @@
     </div>
   {/if}
 
+</div>
+
+<div class="notifications scrollOverflow">
+    {#each notifications as n, i (n.id)}
+        <label class="notification"
+            style='background-color: {n.backgroundColor}; border: 1px solid {n.textColor};'
+            for='closeNotif{n.id}'
+            transition:fly={{duration: 500, x: 50 }}
+        >
+            <p style='color: {n.textColor};'>{n.content}</p>
+            <button id="closeNotif{n.id}" onclick={() => {notifications.splice(i, 1)}}>
+                <div class="svgWrapper" style='color: {n.textColor}'>
+                    <X size=16 />
+                </div>
+            </button>
+        </label>
+    {/each}
 </div>
 
 <style>

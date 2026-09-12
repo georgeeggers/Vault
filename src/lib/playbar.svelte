@@ -1,5 +1,6 @@
 <script lang="ts">
     import { SELECTED_SONG } from "../backend/dev.svelte";
+    import PlayerControls from "./mainpageModules/playerControls.svelte";
 
 
 
@@ -17,14 +18,7 @@
         </div>
     </div>
 
-    <div class="playerControls">
-        <div class="playerButtons">
-            
-        </div>
-        <div class="playerDurationSlider">
-
-        </div>
-    </div>
+    <PlayerControls />
 
 </div>
 
@@ -32,20 +26,7 @@
 
 <style>
 
-.playerButtons {
-    width: 100%;
-    display: flex;
-    flex-direction: row;
-    gap: 10px;
-    align-items: center;
-}
 
-.playerControls {
-    width: 400px;
-    margin-left: auto;
-    margin-right: auto;
-    background-color: var(--bg2);
-}
 
 .songInfo {
     display: flex;

@@ -66,7 +66,7 @@
         box-sizing: border-box;
         align-items: center;
         padding: 10px;
-        background-color: var(--bg1);
+        background-color: var(--bg0);
         border-bottom: 1px solid var(--bg2);
     }
 

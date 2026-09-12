@@ -18,7 +18,7 @@ export const appState: AppState = $state({
         progress: 0,
         duration: 0,
         playing: false,
-        volume: 1.0,
+        volume: .25,
         intervalID: -1
     }
 })

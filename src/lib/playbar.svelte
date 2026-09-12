@@ -16,7 +16,7 @@
         <img alt='bleh' src="{SELECTED_SONG}">
         <div class="songInfoText">
             {#if !appState.player.selectedSong}
-                {#if appState.player.songContainer1}
+                {#if appState.player.songContainer1?.loaded}
                     <p class='text1'>{getSelectedVariation(appState.player.songContainer1.songData).name}</p>
                     <p class='text2'>Song collection</p>
                 {:else}
@@ -24,7 +24,7 @@
                     <p class='text2'>Song collection</p>
                 {/if}
             {:else}
-                {#if appState.player.songContainer2}
+                {#if appState.player.songContainer2?.loaded}
                     <p class='text1'>{getSelectedVariation(appState.player.songContainer2.songData).name}</p>
                     <p class='text2'>Song collection</p>
                 {:else}
@@ -51,6 +51,7 @@
     gap: 10px;
     box-sizing: border-box;
     align-items: center;
+    width: 33%;
 }
 
 .songInfo img {

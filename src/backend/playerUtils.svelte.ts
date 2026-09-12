@@ -27,20 +27,23 @@ export type Player = {
 }
 
 const getHowlContainer = (song: SongContainer) => {
-    const howlContainer: HowlInstance = {
+    const howlContainer: HowlInstance = $state({
         howl: null,
         songData: song,
         duration: 0,
         loaded: false,
-    }
+    });
 
     const howl = new Howl({
         src: [getSongPath(song)],
         volume: appState.player.volume
     }).on('load', () => {
         howlContainer.duration = howl.duration();
-        // howlContainer.loaded = true;
+        howlContainer.loaded = true;
+        console.log("Instance should be loaded");
         howlContainer.howl = howl;
+    }).on('end', () => {
+        selectNext();
     });
 
     return howlContainer;
@@ -67,8 +70,8 @@ export const getSelectedSong = () => {
     return appState.player.selectedSong ? appState.player.songContainer2 : appState.player.songContainer1;
 }
 
-export const stopSong = () => {
-    appState.player.playing = false;
+export const stopSong = (playStatus: boolean = false) => {
+    appState.player.playing = playStatus;
     if(appState.player.currentSong){
         appState.player.currentSong.stop();
         clearInterval(appState.player.intervalID);
@@ -129,9 +132,18 @@ export const stopSeek = (e: any) => {
     }
 }
 
-export const selectNext = () => {
-    appState.player.selectedSong = !appState.player.selectedSong;
 
+export const selectNext = () => {
+    console.log("Switch this to be from queue");
+    addNotification("Switch this to be from queue", "warn", 2000);
+    if(appState.player.currentSong){
+        stopSong(appState.player.playing);
+    }
+    appState.player.selectedSong = !appState.player.selectedSong;
+    selectSong(appState.player.selectedSong ? appState.player.songContainer2 : appState.player.songContainer1);
+    if(appState.player.playing){
+        playSong();
+    }
 }
 
 export const selectSong = (instance: HowlInstance | null) => {
@@ -144,7 +156,7 @@ export const selectSong = (instance: HowlInstance | null) => {
         } else {
             let retries = 50;
             let retryID = setInterval(() => {
-                console.log("Not loaded!");
+                console.log(instance.loaded);
                 if(instance.loaded){
                     appState.player.currentSong = instance.howl;
                     appState.player.duration = instance.duration;
@@ -166,4 +178,16 @@ export const selectSong = (instance: HowlInstance | null) => {
     }
 }
 
+export const updateVolume = () => {
+    if(appState.player.songContainer1){
+        appState.player.songContainer1.howl?.volume(appState.player.volume)
+    }
 
+    if(appState.player.songContainer2){
+        appState.player.songContainer2.howl?.volume(appState.player.volume)
+    }
+
+    if(appState.player.currentSong){
+        appState.player.currentSong.volume(appState.player.volume)
+    }
+}

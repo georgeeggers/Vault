@@ -2,9 +2,9 @@
     import { onDestroy, onMount } from "svelte";
     import { TEST_SONG_DATA, testContainer1, testContainer2 } from "../../backend/dev.svelte";
     import { Howl, Howler } from "howler";
-    import { ChevronFirst, ChevronLast, ChevronLeft, ChevronRight, Cylinder, FastForward, Pause, Play, Rewind, Shuffle, SkipBack, SkipForward } from "@lucide/svelte";
+    import { ChevronFirst, ChevronLast, ChevronLeft, ChevronRight, Cylinder, FastForward, Pause, Play, Rewind, Shuffle, SkipBack, SkipForward, Volume, Volume1, Volume2, VolumeX } from "@lucide/svelte";
     import { appState } from "../../backend/appState.svelte";
-    import { formatSeconds, getSelectedSong, loadSong, playPause, seek, selectSong, stopSeek, stopSong, type HowlInstance } from "../../backend/playerUtils.svelte";
+    import { formatSeconds, getSelectedSong, loadSong, playPause, seek, selectNext, selectSong, stopSeek, stopSong, updateVolume, type HowlInstance } from "../../backend/playerUtils.svelte";
 
 
 onMount(() => {
@@ -60,11 +60,36 @@ onDestroy(() => {
                 {/if}
             </button>
 
-            <button id="skip">
+            <button id="skip" onclick={selectNext}>
                 <div class="svgWrapper">
                     <FastForward size=20 fill='currentColor' strokeWidth={0}/>
                 </div>
             </button>
+            <div id="volumeController">
+                <div class="svgWrapper">
+                    {#if appState.player.volume > .66}
+                        <Volume2 size=20 />
+                    {:else if appState.player.volume > .33}
+                        <Volume1 size=20 />
+                    {:else if appState.player.volume > 0}
+                        <Volume size=20 />
+                    {:else}
+                        <VolumeX size=20 />
+                    {/if}
+                </div>
+                <div id="volumeInputContainer">
+
+                    <div class="background">
+
+                    </div>
+                    <div class="progressIndicator" style='width: calc((100% - 16px) * {appState.player.volume});'>
+
+                    </div>
+
+                    <input id='volumeControllerSlider' bind:value={appState.player.volume} min="0" max="1" step="0.01" type='range' oninput={updateVolume}>
+                </div>
+
+            </div>
         </div>
 
 
@@ -80,10 +105,10 @@ onDestroy(() => {
             <div class="sliderInputContainer">
                 <input id='playerSliderInput' type='range' min="0" max="{appState.player.duration * 100}" bind:value={appState.player.sliderProgress} oninput={(e) => seek(e)} onmousedown={(e) => seek(e)} onmouseup={(e) => stopSeek(e)}>
                 
-                <div id="background">
+                <div class="background">
 
                 </div>
-                <div id="progressIndicator" style='width: calc((100% - 16px) * {(appState.player.sliderProgress / appState.player.duration) / 100});'>
+                <div class="progressIndicator" style='width: calc((100% - 16px) * {(appState.player.sliderProgress / appState.player.duration) / 100});'>
 
                 </div>
             </div>
@@ -163,7 +188,7 @@ onDestroy(() => {
         justify-content: space-between;
     }
 
-    #playerSliderInput {
+    #playerSliderInput, #volumeControllerSlider {
         width: 100%;
         z-index: 3;
     }
@@ -205,7 +230,7 @@ onDestroy(() => {
         background: var(--main5);
     }
 
-    #background {
+    .background {
         width: calc(100% - 16px);
         display: flex;
         height: 10px;
@@ -216,7 +241,7 @@ onDestroy(() => {
         z-index: 1;
     }
 
-    #progressIndicator {
+    .progressIndicator {
         position: absolute;
         left: 8px;
         height: 10px;
@@ -227,7 +252,7 @@ onDestroy(() => {
         pointer-events: none;
     }
 
-    .sliderInputContainer {
+    .sliderInputContainer, #volumeInputContainer {
         width: calc(100% - 90px);
         display: flex;
         position: relative;
@@ -235,6 +260,22 @@ onDestroy(() => {
         align-items: center;
         justify-content: center;
     }
+
+    #volumeInputContainer {
+        width: 100%;
+    }
+
+    #volumeController {
+        display: flex;
+        flex-direction: row;
+        margin-left: 10px;
+        gap: 2px;
+    }
+
+    #volumeController .svgWrapper {
+        color: var(--text5);
+    }
+
 
     .durationIndicatorContainer {
         width: 40px;

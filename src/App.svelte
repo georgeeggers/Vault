@@ -18,7 +18,7 @@
     <Topbar />
   </div>
 
-  <div class="contentArea" style="{appState.playing ? "height: calc(100% - 160px);" : ""}">
+  <div class="contentArea" style="{appState.displayPlaybar ? "height: calc(100% - 160px);" : ""}">
   
     <div class="mainContentContainer">
       <Router {routes} />
@@ -26,7 +26,7 @@
 
   </div>
 
-  {#if appState.playing}
+  {#if appState.displayPlaybar}
     <div class="playbarContainer">
       <Playbar />
     </div>
@@ -81,6 +81,43 @@
     width: 100%;
     display: flex;
     box-sizing: border-box;
+  }
+
+  .notifications {
+    position: fixed;
+    bottom: 0px;
+    right: 0px;
+    display: flex;
+    flex-direction: column-reverse;
+    gap: 10px;
+    max-height: 100%;
+    padding: 10px;
+    z-index: 100;
+  }
+
+  .notification {
+    font-size: 12px;
+    width: fit-content;
+    display: flex;
+    flex-direction: row;
+    min-width: 150px;
+    gap: 50px;
+    box-sizing: border-box;
+    padding: 10px;
+    border-radius: var(--border-radius);
+    align-items: center;
+    cursor: pointer;
+    margin-left: auto;
+  }
+
+  .notification button {
+    background: none;
+    border: none;
+    cursor: pointer;
+  }
+
+  .notification button * {
+    border: none;
   }
 
 </style>

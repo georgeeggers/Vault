@@ -1,5 +1,7 @@
 <script lang="ts">
+    import { appState } from "../backend/appState.svelte";
     import { SELECTED_SONG } from "../backend/dev.svelte";
+    import { getSelectedVariation } from "../backend/songUtils.svelte";
     import PlayerControls from "./mainpageModules/playerControls.svelte";
 
 
@@ -13,8 +15,23 @@
     <div class="songInfo">
         <img alt='bleh' src="{SELECTED_SONG}">
         <div class="songInfoText">
-            <p class='text1'>Song name</p>
-            <p class='text2'>Song collection</p>
+            {#if !appState.player.selectedSong}
+                {#if appState.player.songContainer1}
+                    <p class='text1'>{getSelectedVariation(appState.player.songContainer1.songData).name}</p>
+                    <p class='text2'>Song collection</p>
+                {:else}
+                    <p class='text1'>Loading...</p>
+                    <p class='text2'>Song collection</p>
+                {/if}
+            {:else}
+                {#if appState.player.songContainer2}
+                    <p class='text1'>{getSelectedVariation(appState.player.songContainer2.songData).name}</p>
+                    <p class='text2'>Song collection</p>
+                {:else}
+                    <p class='text1'>Loading...</p>
+                    <p class='text2'>Song collection</p>
+                {/if}  
+            {/if}
         </div>
     </div>
 

@@ -1,79 +1,33 @@
 <script lang="ts">
     import { onDestroy, onMount } from "svelte";
-    import { TEST_SONG_DATA } from "../../backend/dev.svelte";
+    import { TEST_SONG_DATA, testContainer1, testContainer2 } from "../../backend/dev.svelte";
     import { Howl, Howler } from "howler";
-    import { ChevronFirst, ChevronLast, ChevronLeft, ChevronRight, Cylinder, FastForward, Pause, Play, Rewind, SkipBack, SkipForward } from "@lucide/svelte";
+    import { ChevronFirst, ChevronLast, ChevronLeft, ChevronRight, Cylinder, FastForward, Pause, Play, Rewind, Shuffle, SkipBack, SkipForward } from "@lucide/svelte";
+    import { appState } from "../../backend/appState.svelte";
+    import { formatSeconds, getSelectedSong, loadSong, playPause, seek, selectSong, stopSeek, stopSong, type HowlInstance } from "../../backend/playerUtils.svelte";
 
-let songLength = $state(67);
-let progress = $state(0);
-let sliderProgress = $state(0);
-
-
-const formatSeconds = (input: number) => {
-    input = Math.round(input);
-    const seconds = input % 60;
-    input -= seconds;
-    return `${input / 60}:${seconds <= 9 ? `0${seconds}` : seconds}`
-}
-
-let currentSong: Howl | null = $state(null);
-let preloadedSong: Howl | null = $state(null);
-let intervalID = 0;
-
-const startPlaybarTracking = (song: Howl | null) => {
-    if(song){
-        songLength = song.duration();
-        progress = song.seek();
-        intervalID = setInterval(() => {
-            progress = song.seek();
-            sliderProgress = progress * 100;
-        }, 1000);
-    }
-}
-
-const stopPlaybarTracking = () => {
-    clearInterval(intervalID);
-}
 
 onMount(() => {
-    currentSong = new Howl({
-        src: ['/test.mp3']
-    })
-
-    currentSong.volume(0.1);
-    currentSong.on("play", () => startPlaybarTracking(currentSong));
-    
-    currentSong.play();
-
+    // in the actual app, this loading will be handled by the queue system
+    loadSong(testContainer1);
+    loadSong(testContainer2);
+    setTimeout(() => {
+        selectSong(appState.player.songContainer1);
+    }, 500);
 });
 
-const stopSong = () => {
-    if(currentSong){
-        currentSong.stop();
-        clearInterval(intervalID);
-    }
-}
+
 
 onDestroy(() => {
-    clearInterval(intervalID);
-    if(currentSong){
-        currentSong.stop();
+    if(appState.player.currentSong){
+        stopSong();
     }
 })
 
-const seek = (e: any) => {
-    stopPlaybarTracking();
-    progress = sliderProgress / 100;
-}
 
-const stopSeek = (e: any) => {
-    if(currentSong){
-        currentSong.seek(sliderProgress / 100);
-        startPlaybarTracking(currentSong);
-    }
-}
 
-let playing = $state(false);
+
+
 
 </script>
 
@@ -82,14 +36,20 @@ let playing = $state(false);
     <div class="playerControls">
         <div class="playerButtons">
 
+            <button id="shuffle">
+                <div class="svgWrapper">
+                    <Shuffle size=18 />
+                </div>
+            </button>
+
             <button id="previous">
                 <div class="svgWrapper">
                     <Rewind size=20 fill='currentColor' strokeWidth={0}/>
                 </div>
             </button>
 
-            <button id="playPause" onclick={() => {playing = !playing}}>
-                {#if playing}
+            <button id="playPause" onclick={playPause}>
+                {#if !appState.player.playing}
                     <div class="svgWrapper">
                         <Play size=20 fill='currentColor' strokeWidth={0}/>
                     </div>
@@ -105,12 +65,6 @@ let playing = $state(false);
                     <FastForward size=20 fill='currentColor' strokeWidth={0}/>
                 </div>
             </button>
-
-
-
-            {#if currentSong}
-                <button onclick={stopSong}>Stop</button>
-            {/if}
         </div>
 
 
@@ -118,25 +72,25 @@ let playing = $state(false);
         <div class="playerDurationSlider">
             <div class="durationIndicatorContainer left">
                 <p>
-                    {formatSeconds(progress)}
+                    {formatSeconds(appState.player.progress)}
                 </p>
             </div>
 
             
             <div class="sliderInputContainer">
-                <input id='playerSliderInput' type='range' min="0" max="{songLength * 100}" bind:value={sliderProgress} oninput={(e) => seek(e)} onmousedown={(e) => seek(e)} onmouseup={(e) => stopSeek(e)}>
+                <input id='playerSliderInput' type='range' min="0" max="{appState.player.duration * 100}" bind:value={appState.player.sliderProgress} oninput={(e) => seek(e)} onmousedown={(e) => seek(e)} onmouseup={(e) => stopSeek(e)}>
                 
                 <div id="background">
 
                 </div>
-                <div id="progressIndicator" style='width: calc((100% - 16px) * {(sliderProgress / songLength) / 100});'>
+                <div id="progressIndicator" style='width: calc((100% - 16px) * {(appState.player.sliderProgress / appState.player.duration) / 100});'>
 
                 </div>
             </div>
 
             <div class="durationIndicatorContainer right">
                 <p>
-                    {formatSeconds(songLength)}
+                    {formatSeconds(appState.player.duration)}
                 </p>
             </div>
         </div>
@@ -174,19 +128,19 @@ let playing = $state(false);
     #playPause {
         width: 32px;
         height: 32px;
-        background-color: var(--bg2);
+        background-color: var(--bg1);
     }
 
     #playPause * {
         color: var(--main5);
     }
 
-    #skip *, #previous * {
+    #skip *, #previous *, #shuffle * {
         color: var(--text5);
         transition: color .1s;
     }
 
-    #skip:hover *, #previous:hover * {
+    #skip:hover *, #previous:hover *, #shuffle:hover * {
         color: var(--main5);
     }
 

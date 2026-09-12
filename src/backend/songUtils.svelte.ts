@@ -40,3 +40,12 @@ export type SongContainer = {
     collectionId: string,
     id: string
 }
+
+export const getSelectedVariation = (song: SongContainer) => {
+    return song.variations[song.selectedVariation];
+}
+
+export const getSongPath = (song: SongContainer) => {
+    const variation: SongData = song.variations[song.selectedVariation];
+    return variation.content;
+}

@@ -2,7 +2,7 @@
     import { Plus, Settings2 } from "@lucide/svelte";
     import { TEST_DATA } from "../../backend/dev.svelte";
     import { appState } from "../../backend/appState.svelte";
-    import { formatSeconds } from "../../backend/playerUtils.svelte";
+    import { formatSeconds, loadQueueFromProject } from "../../backend/playerUtils.svelte";
     import { replace } from "svelte-spa-router";
     import type { Project } from "../../backend/collectionUtils.svelte";
     import { addNotification } from "../../backend/appUtils.svelte";
@@ -16,7 +16,7 @@
             {:else}
                 <img src="/mood.png" alt='poop'>
             {/if}
-            <button id='edit{p.id}' onclick={() => addNotification("This does nothing rn. Sorry...", "warn", 2000)} class='invis'>Edit project</button>
+            <button id='edit{p.id}' onclick={() => loadQueueFromProject(p)} class='invis'>Edit project</button>
             <div class="text">
                 <p>{p.name}</p>
                 <div class="informationArea">

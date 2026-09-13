@@ -4,25 +4,14 @@
     import { Howl, Howler } from "howler";
     import { ChevronFirst, ChevronLast, ChevronLeft, ChevronRight, Cylinder, FastForward, Pause, Play, Rewind, Shuffle, SkipBack, SkipForward, Volume, Volume1, Volume2, VolumeX } from "@lucide/svelte";
     import { appState } from "../../backend/appState.svelte";
-    import { formatSeconds, getSelectedSong, loadSong, playPause, seek, selectNext, selectSong, stopSeek, stopSong, updateVolume, type HowlInstance } from "../../backend/playerUtils.svelte";
+    import { formatSeconds, getSelectedSong, loadSong, playPause, seek, selectNext, selectSong, stopSeek, stopSong, toggleShuffle, updateVolume, type HowlInstance } from "../../backend/playerUtils.svelte";
 
 
-onMount(() => {
-    // in the actual app, this loading will be handled by the queue system
-    loadSong(testContainer1);
-    loadSong(testContainer2);
-    setTimeout(() => {
-        selectSong(appState.player.songContainer1);
-    }, 500);
-});
-
-
-
-onDestroy(() => {
-    if(appState.player.currentSong){
-        stopSong();
-    }
-})
+    onDestroy(() => {
+        if(appState.player.currentSong){
+            stopSong();
+        }
+    })
 
 
 
@@ -36,8 +25,8 @@ onDestroy(() => {
     <div class="playerControls">
         <div class="playerButtons">
 
-            <button id="shuffle" style='margin-left: auto;'>
-                <div class="svgWrapper">
+            <button id="shuffle" style='margin-left: auto;' onclick={toggleShuffle}>
+                <div class="svgWrapper" style=' {appState.player.shuffle ? "color: var(--main5);" : ""}'>
                     <Shuffle size=18 />
                 </div>
             </button>
@@ -60,7 +49,7 @@ onDestroy(() => {
                 {/if}
             </button>
 
-            <button id="skip" onclick={selectNext}>
+            <button id="skip" onclick={() => selectNext(false)}>
                 <div class="svgWrapper">
                     <FastForward size=20 fill='currentColor' strokeWidth={0}/>
                 </div>

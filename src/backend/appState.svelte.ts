@@ -23,7 +23,11 @@ export const appState: AppState = $state({
         playingID: "",
         playing: false,
         volume: .25,
-        intervalID: -1
+        intervalID: -1,
+        shuffle: false,
+        currentQueue: [],
+        shuffleQueue: [],
+        recentlyPlayed: [],
     },
     projects: [testProject, testProject2]
 })

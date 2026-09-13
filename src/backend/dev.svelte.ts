@@ -43,15 +43,27 @@ export const testContainer3: SongContainer = {
     id: "testContainerID3",
     duration: 147,
     name: "cloudgazing"
+}
 
+export const testContainer4: SongContainer = {
+    variations: [{
+        content: "/scary.mp3",
+        containerId: 'testContainerID4',
+        id: "testcontainer4Variation1",
+    }],
+    selectedVariation: 0,
+    projectID: "testProject1ID",
+    id: "testContainerID4",
+    duration: 118,
+    name: "scary"
 }
 
 export const testProject: Project = {
     name: "Rather b dead",
     projectType: "multiple",
-    content: [testContainer1, testContainer2],
+    content: [testContainer1, testContainer2, testContainer3, testContainer4],
     thumbnail: "/ratherbdead.png",
-    totalLength: 123 + 151,
+    totalLength: 123 + 151 + 147 + 118,
     id: "testProject1ID"
 }
 

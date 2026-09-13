@@ -1,10 +1,10 @@
+import { Shuffle } from "@lucide/svelte"
 import { appState } from "./appState.svelte"
 import { addNotification } from "./appUtils.svelte"
+import type { Project } from "./collectionUtils.svelte"
 import { getSongPath, type SongContainer } from "./songUtils.svelte"
 
-export type Queue = {
-    data: SongContainer[]
-}
+
 
 export type HowlInstance = {
     howl: Howl | null,
@@ -26,6 +26,10 @@ export type Player = {
     playing: boolean,
     volume: number,
     intervalID: number,
+    shuffle: boolean,
+    currentQueue: SongContainer[],
+    shuffleQueue: SongContainer[],
+    recentlyPlayed: SongContainer[],
 }
 
 const getHowlContainer = (song: SongContainer) => {
@@ -47,6 +51,9 @@ const getHowlContainer = (song: SongContainer) => {
         howlContainer.howl = howl;
     }).on('end', () => {
         selectNext();
+        if(appState.player.playing){
+            playSong();
+        }
     });
 
     return howlContainer;
@@ -66,6 +73,18 @@ export const loadSong = (song: SongContainer) => {
         } else {
             appState.player.songContainer2 = getHowlContainer(song);
         }
+    }
+}
+
+export const loadNextFromQueue = () => {
+    if(appState.player.shuffle && appState.player.shuffleQueue.length > 0){
+        loadSong(appState.player.shuffleQueue[0]);
+        appState.player.shuffleQueue.splice(0, 1);
+    } else if (appState.player.currentQueue.length > 0) {
+        loadSong(appState.player.currentQueue[0]);
+        appState.player.currentQueue.splice(0, 1);
+    } else {
+        addNotification("[DEBUG] No data found for queue", "warn", 2000);
     }
 }
 
@@ -139,17 +158,25 @@ export const stopSeek = (e: any) => {
 }
 
 
-export const selectNext = () => {
-    console.log("Switch this to be from queue");
-    addNotification("Switch this to be from queue", "warn", 2000);
+export const selectNext = (fromSongEnd: boolean = true) => {
     if(appState.player.currentSong){
         stopSong(appState.player.playing);
     }
+
     appState.player.selectedSong = !appState.player.selectedSong;
-    selectSong(appState.player.selectedSong ? appState.player.songContainer2 : appState.player.songContainer1);
+    if(!(appState.player.selectedSong ? appState.player.songContainer2 : appState.player.songContainer1)){
+        stopSong();
+        return;
+    } else {
+        selectSong(appState.player.selectedSong ? appState.player.songContainer2 : appState.player.songContainer1);
+    }
+    appState.player.selectedSong ? appState.player.songContainer1 : appState.player.songContainer2 = null;
+    loadNextFromQueue();
+
     if(appState.player.playing){
         playSong();
     }
+
 }
 
 export const selectSong = (instance: HowlInstance | null) => {
@@ -197,3 +224,41 @@ export const updateVolume = () => {
         appState.player.currentSong.volume(appState.player.volume)
     }
 }
+
+const shuffle = (queueData: SongContainer[]) => {
+  for (let i = queueData.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [queueData[i], queueData[j]] = [queueData[j], queueData[i]];
+  }
+  return queueData;
+}   
+
+export const toggleShuffle = () => {
+    appState.player.shuffle = !appState.player.shuffle;
+    if(appState.player.shuffle){
+        appState.player.shuffleQueue = shuffle([...appState.player.currentQueue]);
+    }
+}
+
+export const loadQueueFromProject = (project: Project) => {
+    appState.player.recentlyPlayed.length = 0;
+    stopSong();
+    appState.player.songContainer1 = null;
+    appState.player.songContainer2 = null;
+    if(project.projectType == "multiple"){
+        appState.player.currentQueue = [...project.content];
+    } else {
+        appState.player.currentQueue.length = 0;
+        appState.player.currentQueue.push($state.snapshot(project.content));
+    }
+
+    if(appState.player.shuffle){
+        appState.player.shuffleQueue = shuffle([...appState.player.currentQueue]);
+    }
+
+    appState.player.selectedSong = false;
+    loadNextFromQueue();
+    loadNextFromQueue();
+    selectSong(appState.player.songContainer1);
+}
+

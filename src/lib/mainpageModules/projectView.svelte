@@ -1,18 +1,29 @@
-<script>
+<script lang='ts'>
     import { Plus, Settings2 } from "@lucide/svelte";
     import { TEST_DATA } from "../../backend/dev.svelte";
+    import { appState } from "../../backend/appState.svelte";
+    import { formatSeconds } from "../../backend/playerUtils.svelte";
+    import { replace } from "svelte-spa-router";
+    import type { Project } from "../../backend/collectionUtils.svelte";
 
-
+    const startEdit = (project: Project) => {
+        replace("/editProject/" + project.id)
+    }
 
 </script>
 <div class="containers">
-    {#each TEST_DATA as t}
-        <label class="song" for='{t}'>
-            <img src="{t}" alt='poop'>
+    {#each appState.projects as p}
+        <label class="song" for='edit{p.id}'>
+            {#if p.thumbnail}
+                <img src="{p.thumbnail}" alt='poop'>
+            {:else}
+                <img src="/mood.png" alt='poop'>
+            {/if}
+            <button id='edit{p.id}' onclick={() => startEdit(p)} class='invis'>Edit project</button>
             <div class="text">
-                <p>{t}</p>
+                <p>{p.name}</p>
                 <div class="informationArea">
-                    <p>67m 2s</p>
+                    <p>{formatSeconds(p.totalLength)}</p>
                     <div class="svgWrapper">
                         <Settings2 size=12 />
                     </div>

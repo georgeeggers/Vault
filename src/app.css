@@ -9,7 +9,7 @@
     scrollbar-width: none;
     color: var(--text1);
 
-    --themeHue: 350;
+    --themeHue: 200;
 
     --main0: hsl(var(--themeHue), 40.952%, 17%);
     --main1: hsl(var(--themeHue), 39.667%, 25%);

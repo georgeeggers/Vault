@@ -1,9 +1,12 @@
+import type { Project } from "./collectionUtils.svelte"
+import { testProject } from "./dev.svelte"
 import type { Player } from "./playerUtils.svelte"
 
 export type AppState = {
     searchTerm: string,
     displayPlaybar: boolean,
-    player: Player
+    player: Player,
+    projects: Project[],
 }
 
 export const appState: AppState = $state({
@@ -20,5 +23,6 @@ export const appState: AppState = $state({
         playing: false,
         volume: .25,
         intervalID: -1
-    }
+    },
+    projects: [testProject]
 })

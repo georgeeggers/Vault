@@ -1,7 +1,7 @@
 <script>
     import { Home, Maximize, Minus, Search, Settings2, X } from "@lucide/svelte";
     import { getCurrentWindow } from "@tauri-apps/api/window";
-    import { replace } from "svelte-spa-router";
+    import { replace, router } from "svelte-spa-router";
     import { appState } from "../backend/appState.svelte";
     const window = getCurrentWindow();
 
@@ -19,7 +19,7 @@
 
 
     <button class="locationButton" style='margin-left: 40px;' onclick={() => replace('/')}>
-        <div class="svgWrapper">
+        <div class="svgWrapper" style="{router.location == "/" ? "color: var(--main5);" : ""}">
             <Home size={ICON_SIZE} fill="currentColor"/>
         </div>
     </button>

@@ -1,5 +1,7 @@
+import EditProject from "./lib/editProject.svelte";
 import Main from "./lib/main.svelte";
 
 export const routes = {
-    "/": Main
+    "/": Main,
+    "/editProject/:id": EditProject
 }

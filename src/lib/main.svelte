@@ -1,6 +1,6 @@
 <script>
     import { SELECTED_SONG } from "../backend/dev.svelte";
-import LyricSyncTest from "./mainpageModules/lyricSyncTest.svelte";
+    import LyricSyncTest from "./mainpageModules/lyricSyncTest.svelte";
     import ProjectView from "./mainpageModules/projectView.svelte";
     import YourVault from "./mainpageModules/yourVault.svelte";
 

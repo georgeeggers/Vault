@@ -156,6 +156,9 @@ onDestroy(() => {
     #playPause {
         width: 32px;
         height: 32px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
         background-color: var(--bg1);
     }
 
@@ -164,7 +167,7 @@ onDestroy(() => {
     }
 
     #skip *, #previous *, #shuffle * {
-        color: var(--text5);
+        color: var(--text7);
         transition: color .1s;
     }
 
@@ -276,7 +279,7 @@ onDestroy(() => {
     }
 
     #volumeController .svgWrapper {
-        color: var(--text5);
+        color: var(--text7);
     }
 
 
@@ -286,7 +289,7 @@ onDestroy(() => {
     }
 
     .durationIndicatorContainer p {
-        color: var(--text5);
+        color: var(--text7);
         font-size: 14px;
     }
 

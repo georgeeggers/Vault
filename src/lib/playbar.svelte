@@ -17,7 +17,7 @@
         <div class="songInfoText">
             {#if !appState.player.selectedSong}
                 {#if appState.player.songContainer1?.loaded}
-                    <p class='text1'>{getSelectedVariation(appState.player.songContainer1.songData).name}</p>
+                    <p class='text1'>{appState.player.songContainer1.songData.name}</p>
                     <p class='text2'>Song collection</p>
                 {:else}
                     <p class='text1'>Loading...</p>
@@ -25,7 +25,7 @@
                 {/if}
             {:else}
                 {#if appState.player.songContainer2?.loaded}
-                    <p class='text1'>{getSelectedVariation(appState.player.songContainer2.songData).name}</p>
+                    <p class='text1'>{appState.player.songContainer2.songData.name}</p>
                     <p class='text2'>Song collection</p>
                 {:else}
                     <p class='text1'>Loading...</p>

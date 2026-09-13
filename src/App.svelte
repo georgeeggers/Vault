@@ -74,6 +74,7 @@
   .topbarContainer {
     width: 100%;
     min-height: 60px;
+    height: 60px;
   }
   
   .contentArea {

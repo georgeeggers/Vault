@@ -93,7 +93,8 @@ const scrollToLyric = (index: number) => {
 <style>
   #lyricDisplay {
     width: 100%;
-    background-color: var(--bg1);
+    background-color: var(--bg0);
+    border: 1px solid var(--bg1);
     border-radius: var(--border-radius);
     display: flex;
     align-items: center;

@@ -1,5 +1,5 @@
 import type { Project } from "./collectionUtils.svelte"
-import { testProject } from "./dev.svelte"
+import { testProject, testProject2 } from "./dev.svelte"
 import type { Player } from "./playerUtils.svelte"
 
 export type AppState = {
@@ -20,9 +20,10 @@ export const appState: AppState = $state({
         sliderProgress: 0,
         progress: 0,
         duration: 0,
+        playingID: "",
         playing: false,
         volume: .25,
         intervalID: -1
     },
-    projects: [testProject]
+    projects: [testProject, testProject2]
 })

@@ -11,8 +11,8 @@
     <div class="mainModulesContainer">
 
         <div class="mainModules scrollOverflow">
-            <ProjectView />
             <YourVault />
+            <ProjectView />
             <LyricSyncTest />
         </div>
     </div>
@@ -56,7 +56,8 @@
         height: 100%;
         border-radius: var(--border-radius);
         padding: 10px;
-        background-color: var(--bg1);
+        background-color: var(--bg0);
+        border: 1px solid var(--bg1);
         box-sizing: border-box;
     }
 

@@ -1,7 +1,7 @@
 import type { Project } from "./collectionUtils.svelte"
 import type { SongContainer } from "./songUtils.svelte"
 
-export const TEST_DATA = ["/bart.png", "/deadPlants.png", "/mood.png", "/randomStuff.png", "/ratherbdead.png"]
+export const TEST_DATA = ["/bart.png", "/deadPlants.png", "/default.png", "/randomStuff.png", "/ratherbdead.png"]
 export const SELECTED_SONG = "/ratherbdead.png"
 export const TEST_SONG_DATA = "/test.mp3"
 
@@ -11,11 +11,12 @@ export const testContainer1: SongContainer = {
         content: '/test.mp3',
         containerId: 'testContainerID1',
         id: "testContainer1Variation1",
-        name: "Evil Beat"
     }],
     selectedVariation: 0,
-    collectionId: "none",
+    projectID: "testProject1ID",
     id: 'testContainerID1',
+    duration: 123,
+    name: "Evil Beat"
 }
 
 export const testContainer2: SongContainer = {
@@ -23,11 +24,26 @@ export const testContainer2: SongContainer = {
         content: '/test2.mp3',
         containerId: 'testContainerID2',
         id: "testContainer2Variation1",
-        name: "Rather b dead"
     }],
     selectedVariation: 0,
-    collectionId: "none",
+    projectID: "testProject1ID",
     id: 'testContainerID2',
+    duration: 151,
+    name: "Rather b dead"
+}
+
+export const testContainer3: SongContainer = {
+    variations: [{
+        content: "/cloudgazing.mp3",
+        containerId: 'testContainerID3',
+        id: "testcontainer3Variation1",
+    }],
+    selectedVariation: 0,
+    projectID: "testProject2ID",
+    id: "testContainerID3",
+    duration: 147,
+    name: "cloudgazing"
+
 }
 
 export const testProject: Project = {
@@ -37,4 +53,13 @@ export const testProject: Project = {
     thumbnail: "/ratherbdead.png",
     totalLength: 123 + 151,
     id: "testProject1ID"
+}
+
+export const testProject2: Project = {
+    name: "cloudgazing",
+    projectType: "single",
+    content: testContainer3,
+    thumbnail: "/cloudgazing.png",
+    totalLength: 147,
+    id: 'testProject2ID'
 }

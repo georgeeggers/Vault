@@ -13,10 +13,16 @@ Favorites or pinned
  | [ ] Pin certain albums or songs or whatever
  | [ ] Maybe use a bento-style layout for these. Probably gonna have to generate this somehow with javascript
 
-# goofy settings
+# extras
 
 spatial audio selector
-    
+    make good use of howl and its ability to calculate spatial audio
 
 coproducer 
     have a little gif of a character dancing to the music
+
+background images
+    upload background images, or have them be based on current playing cover art
+
+lyric processing
+    

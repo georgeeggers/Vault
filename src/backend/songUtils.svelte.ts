@@ -24,7 +24,6 @@ export type SongData = {
     content: string,
     containerId: string,
     id: string,
-    name: string,
     options?: SongDataOptions
 }
 
@@ -37,8 +36,10 @@ export type DatabaseSongContainer = {
 export type SongContainer = {
     variations: SongData[],
     selectedVariation: number,
-    collectionId: string,
-    id: string
+    projectID: string,
+    id: string,
+    name: string,
+    duration: number,
 }
 
 export const getSelectedVariation = (song: SongContainer) => {

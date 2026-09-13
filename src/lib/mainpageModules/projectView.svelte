@@ -5,10 +5,7 @@
     import { formatSeconds } from "../../backend/playerUtils.svelte";
     import { replace } from "svelte-spa-router";
     import type { Project } from "../../backend/collectionUtils.svelte";
-
-    const startEdit = (project: Project) => {
-        replace("/editProject/" + project.id)
-    }
+    import { addNotification } from "../../backend/appUtils.svelte";
 
 </script>
 <div class="containers">
@@ -19,35 +16,27 @@
             {:else}
                 <img src="/mood.png" alt='poop'>
             {/if}
-            <button id='edit{p.id}' onclick={() => startEdit(p)} class='invis'>Edit project</button>
+            <button id='edit{p.id}' onclick={() => addNotification("This does nothing rn. Sorry...", "warn", 2000)} class='invis'>Edit project</button>
             <div class="text">
                 <p>{p.name}</p>
                 <div class="informationArea">
-                    <p>{formatSeconds(p.totalLength)}</p>
-                    <div class="svgWrapper">
-                        <Settings2 size=12 />
-                    </div>
+                    <p>{formatSeconds(p.totalLength, true)}</p>
+                    {#if p.projectType == "single"}
+                        <p>Single</p>
+                    {:else}
+                        <p>{p.content.length} tracks</p>
+
+                    {/if}
                 </div>
             </div>
         </label>
     {/each}
 
-    <button class='btn main'>
-        <div class="svgWrapper">
-            <Plus size=16 />
-        </div>
-        New Project
-    </button>
+
 
 </div>
 
 <style>
-
-    .btn.main {
-        align-items: center;
-        justify-content: center;
-        font-size: 16px;
-    }
 
     .informationArea {
         width: 100%;
@@ -60,7 +49,8 @@
         width: 100%;
         height: fit-content;
         gap: 10px;
-        background-color: var(--bg1);
+        background-color: var(--bg0);
+        border: 1px solid var(--bg1);
         border-radius: var(--border-radius);
         padding: 10px;
         box-sizing: border-box;
@@ -75,7 +65,7 @@
         flex-direction: column;
         align-items: center;
         justify-content: center;
-        background-color: var(--bg2);
+        background-color: var(--bg1);
         border-radius: var(--border-radius);
         height: fit-content;
     }

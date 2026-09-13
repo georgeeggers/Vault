@@ -59,6 +59,7 @@
 
     .topbar {
         width: 100%;
+        min-height: 100%;
         height: 100%;
         display: flex;
         flex-direction: row;
@@ -71,8 +72,8 @@
     }
 
     .locationButton {
-        width: 45px;
-        height: 45px;
+        width: 40px;
+        height: 40px;
         display: flex;
         align-items: center;
         justify-content: center;
@@ -86,9 +87,9 @@
         background: none;
         border: none;
         cursor: pointer;
-        min-width: 45px;
-        width: 45px;
-        height: 45px;
+        min-width: 40px;
+        width: 40px;
+        height: 40px;
         display: flex;
         align-items: center;
         justify-content: center;

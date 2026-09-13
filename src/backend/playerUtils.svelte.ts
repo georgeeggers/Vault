@@ -11,6 +11,7 @@ export type HowlInstance = {
     songData: SongContainer,
     duration: number,
     loaded: boolean,
+    id: string,
 }
 
 export type Player = {
@@ -21,6 +22,7 @@ export type Player = {
     progress: number,
     duration: number,
     sliderProgress: number,
+    playingID: string,
     playing: boolean,
     volume: number,
     intervalID: number,
@@ -32,6 +34,7 @@ const getHowlContainer = (song: SongContainer) => {
         songData: song,
         duration: 0,
         loaded: false,
+        id: "howl_" + song.id
     });
 
     const howl = new Howl({
@@ -88,7 +91,6 @@ export const playSong = () => {
 }
 
 export const playPause = () => {
-    console.log("Test");
     if(appState.player.playing){
         stopSong();
     } else {
@@ -113,11 +115,15 @@ export const stopPlaybarTracking = () => {
     clearInterval(appState.player.intervalID);
 }
 
-export const formatSeconds = (input: number) => {
+export const formatSeconds = (input: number, mode: boolean = false) => {
     input = Math.round(input);
     const seconds = input % 60;
     input -= seconds;
+    if(mode){
+        return `${input / 60}m ${seconds}s`
+    }
     return `${input / 60}:${seconds <= 9 ? `0${seconds}` : seconds}`
+
 }
 
 export const seek = (e: any) => {

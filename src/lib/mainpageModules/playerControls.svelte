@@ -36,7 +36,7 @@ onDestroy(() => {
     <div class="playerControls">
         <div class="playerButtons">
 
-            <button id="shuffle">
+            <button id="shuffle" style='margin-left: auto;'>
                 <div class="svgWrapper">
                     <Shuffle size=18 />
                 </div>
@@ -65,6 +65,7 @@ onDestroy(() => {
                     <FastForward size=20 fill='currentColor' strokeWidth={0}/>
                 </div>
             </button>
+
             <div id="volumeController">
                 <div class="svgWrapper">
                     {#if appState.player.volume > .66}
@@ -136,6 +137,8 @@ onDestroy(() => {
         height: calc(100% - 20px);
         align-items: center;
         justify-content: center;
+        padding: 5px 20px 5px 20px;
+        box-sizing: border-box;
     }
 
     .playerButtons button {
@@ -170,11 +173,10 @@ onDestroy(() => {
     }
 
     .playerControls {
-        width: 400px;
+        width: 100%;
         margin-left: auto;
         margin-right: auto;
         box-sizing: border-box;
-        padding: 5px;
         display: flex;
         flex-direction: column;
         justify-content: center;
@@ -268,8 +270,9 @@ onDestroy(() => {
     #volumeController {
         display: flex;
         flex-direction: row;
-        margin-left: 10px;
+        margin-left: auto;
         gap: 2px;
+
     }
 
     #volumeController .svgWrapper {

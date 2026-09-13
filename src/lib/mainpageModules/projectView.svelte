@@ -58,7 +58,7 @@
     }
 
     .song {
-        min-width: 100%;
+        width: 100%;
         box-sizing: border-box;
         display: flex;
         flex-direction: column;

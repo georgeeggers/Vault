@@ -35,7 +35,9 @@
         </div>
     </div>
 
-    <PlayerControls />
+    <div class="playerControlsContainer">
+        <PlayerControls />
+    </div>
 
 </div>
 
@@ -78,6 +80,12 @@
     display: flex;
     box-sizing: border-box;
     padding: 10px;
+    flex-direction: row;
+}
+
+.playerControlsContainer {
+    width: 67%; /* hehe 67 */
+    display: flex;
     flex-direction: row;
 }
 

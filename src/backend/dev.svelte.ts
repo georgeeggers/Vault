@@ -1,3 +1,4 @@
+import { addNotification } from "./appUtils.svelte"
 import type { Project } from "./collectionUtils.svelte"
 import type { SongContainer } from "./songUtils.svelte"
 
@@ -74,4 +75,16 @@ export const testProject2: Project = {
     thumbnail: "/cloudgazing.png",
     totalLength: 147,
     id: 'testProject2ID'
+}
+
+const DEBUG_LEVEL: number = 1;
+
+export const debug = (...messages: any) => {
+    if(DEBUG_LEVEL >= 1){
+        console.log(messages);
+    }
+
+    if(DEBUG_LEVEL >= 2){
+        addNotification(messages[0], "fail");
+    }
 }

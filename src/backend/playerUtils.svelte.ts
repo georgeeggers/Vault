@@ -3,6 +3,7 @@ import { appState } from "./appState.svelte"
 import { addNotification } from "./appUtils.svelte"
 import type { Project } from "./collectionUtils.svelte"
 import { getSongPath, type SongContainer } from "./songUtils.svelte"
+import { debug } from "./dev.svelte"
 
 
 
@@ -32,7 +33,10 @@ export type Player = {
     recentlyPlayed: SongContainer[],
 }
 
+// for some reason, this just doesnt want to function if you already have content loaded. Why? Who knows.
+// nevermind I know now. turns out the freaking
 const getHowlContainer = (song: SongContainer) => {
+    debug("🚨🚨🚨 instantiating new howl instance 🚨🚨🚨")
     const howlContainer: HowlInstance = $state({
         howl: null,
         songData: song,
@@ -40,21 +44,24 @@ const getHowlContainer = (song: SongContainer) => {
         loaded: false,
         id: "howl_" + song.id
     });
+    debug("Howl is this before instantiation", $state.snapshot(howlContainer));
 
     const howl = new Howl({
         src: [getSongPath(song)],
         volume: appState.player.volume
     }).on('load', () => {
+        debug(`😄 onload callback triggered on ${howlContainer.id}. Everything is dandy!`)
         howlContainer.duration = howl.duration();
         howlContainer.loaded = true;
-        console.log("Instance should be loaded");
         howlContainer.howl = howl;
     }).on('end', () => {
         selectNext();
         if(appState.player.playing){
             playSong();
         }
-    });
+    }).load();
+
+    debug("HOWL ITSELF IS", howl)
 
     return howlContainer;
 }
@@ -78,9 +85,11 @@ export const loadSong = (song: SongContainer) => {
 
 export const loadNextFromQueue = () => {
     if(appState.player.shuffle && appState.player.shuffleQueue.length > 0){
+        debug("\nAdding from shuffle");
         loadSong(appState.player.shuffleQueue[0]);
         appState.player.shuffleQueue.splice(0, 1);
     } else if (appState.player.currentQueue.length > 0) {
+        debug("\n🤯🤯🤯 Adding from queue", $state.snapshot(appState.player.currentQueue[0]));
         loadSong(appState.player.currentQueue[0]);
         appState.player.currentQueue.splice(0, 1);
     } else {
@@ -180,17 +189,20 @@ export const selectNext = (fromSongEnd: boolean = true) => {
 }
 
 export const selectSong = (instance: HowlInstance | null) => {
+    debug("Attempting to instantiate ", $state.snapshot(instance));
     if(instance){
         if(instance.loaded){
+            debug("Instance is loaded!!!");
             appState.player.currentSong = instance.howl;
             appState.player.duration = instance.duration;
             appState.player.progress = 0;
             appState.player.sliderProgress = 0;
         } else {
+            debug("Selecting song!");
             let retries = 50;
             let retryID = setInterval(() => {
-                console.log(instance.loaded);
                 if(instance.loaded){
+                    debug(`Instance loaded after ${50 - retries} retries`)
                     appState.player.currentSong = instance.howl;
                     appState.player.duration = instance.duration;
                     appState.player.progress = 0;
@@ -241,10 +253,10 @@ export const toggleShuffle = () => {
 }
 
 export const loadQueueFromProject = (project: Project) => {
+    debug("\n\n\nInstantiating frmo project from calendar!!!!\n\n\n");
     appState.player.recentlyPlayed.length = 0;
     stopSong();
-    appState.player.songContainer1 = null;
-    appState.player.songContainer2 = null;
+
     if(project.projectType == "multiple"){
         appState.player.currentQueue = [...project.content];
     } else {
@@ -257,8 +269,11 @@ export const loadQueueFromProject = (project: Project) => {
     }
 
     appState.player.selectedSong = false;
+    appState.player.songContainer1 = null;
+    appState.player.songContainer2 = null;
     loadNextFromQueue();
     loadNextFromQueue();
+    debug(`\nSong container has at time of load`, $state.snapshot(appState.player.songContainer1));
     selectSong(appState.player.songContainer1);
 }
 

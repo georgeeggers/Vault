@@ -11,8 +11,8 @@
     <div class="mainModulesContainer">
 
         <div class="mainModules scrollOverflow">
-            <YourVault />
             <ProjectView />
+            <YourVault />
             <LyricSyncTest />
         </div>
     </div>

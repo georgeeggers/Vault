@@ -3,20 +3,11 @@
     import { TEST_DATA } from "../../backend/dev.svelte";
     import { appState } from "../../backend/appState.svelte";
     import type { SongContainer } from "../../backend/songUtils.svelte";
-    import { formatSeconds, getSelectedSong } from "../../backend/playerUtils.svelte";
+    import { formatSeconds, getPlayingID, getSelectedSong } from "../../backend/playerUtils.svelte";
 
     let vaultSearchTerm = $state("")
     let vaultSearchMode = $state(false);
     let placeholderText = $state("Search for a project");
-
-    const isPlaying = (song: SongContainer) => {
-        if(appState.player.selectedSong){
-            if(song.variations[song.selectedVariation].id == appState.player.playingID){
-                return true;
-            }
-        }
-        return false;
-    }
 
 </script>
 
@@ -63,7 +54,7 @@
         </div>
         {#if project.projectType == 'multiple'}
             {#each project.content as songContainer, i}
-                <div class="songDataContainer {isPlaying(songContainer) ? "playing" : ""}">
+                <div class="songDataContainer {getPlayingID() == songContainer.id ? "playing" : ""}">
                     <p>{i + 1}</p>
                     <div class="songData">
                         <div class="songDataText">
@@ -81,7 +72,7 @@
                 </div>
             {/each}
         {:else}
-             <div class="songDataContainer {isPlaying(project.content) ? "playing" : ""}">
+             <div class="songDataContainer {getPlayingID() == project.content.id  ? "playing" : ""}">
                 <p>1</p>
                 <div class="songData">
                     <div class="songDataText">
@@ -230,7 +221,7 @@
         background-color: var(--bg1);
     }
 
-    .playing > p{
+    .playing > p {
         color: var(--main5) !important;
     }
 
@@ -240,6 +231,10 @@
 
     .playing .songData {
         background-color: var(--main3) !important;
+    }
+
+    .playing .songData * {
+        color: var(--text1);
     }
 
     .yourVault {

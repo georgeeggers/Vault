@@ -27,15 +27,8 @@ export type SongData = {
     options?: SongDataOptions
 }
 
-export type DatabaseSongContainer = {
-    variations: string[],
-    selectedVariation: number,
-    id: string,
-}
-
 export type SongContainer = {
-    variations: SongData[],
-    selectedVariation: number,
+    songData: SongData,
     projectID: string,
     id: string,
     name: string,
@@ -43,10 +36,9 @@ export type SongContainer = {
 }
 
 export const getSelectedVariation = (song: SongContainer) => {
-    return song.variations[song.selectedVariation];
+    return song.songData;
 }
 
 export const getSongPath = (song: SongContainer) => {
-    const variation: SongData = song.variations[song.selectedVariation];
-    return variation.content;
+    return song.songData.content;
 }

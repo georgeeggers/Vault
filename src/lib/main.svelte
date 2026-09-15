@@ -1,4 +1,5 @@
 <script>
+    import { appState } from "../backend/appState.svelte";
     import { SELECTED_SONG } from "../backend/dev.svelte";
     import LyricSyncTest from "./mainpageModules/lyricSyncTest.svelte";
     import ProjectView from "./mainpageModules/projectView.svelte";
@@ -21,8 +22,8 @@
         <div class="nowPlaying">
             <img src='{SELECTED_SONG}' alt='bleh'>
         </div>
-    </div>
 
+    </div>
 </div>
 
 <style>

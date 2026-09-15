@@ -13,11 +13,6 @@
         }
     })
 
-
-
-
-
-
 </script>
 
 
@@ -30,6 +25,8 @@
                     <Shuffle size=18 />
                 </div>
             </button>
+
+
 
             <button id="previous">
                 <div class="svgWrapper">

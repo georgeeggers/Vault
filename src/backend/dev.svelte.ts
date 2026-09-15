@@ -8,12 +8,11 @@ export const TEST_SONG_DATA = "/test.mp3"
 
 
 export const testContainer1: SongContainer = {
-    variations: [{
+    songData: {
         content: '/test.mp3',
         containerId: 'testContainerID1',
         id: "testContainer1Variation1",
-    }],
-    selectedVariation: 0,
+    },
     projectID: "testProject1ID",
     id: 'testContainerID1',
     duration: 123,
@@ -21,12 +20,11 @@ export const testContainer1: SongContainer = {
 }
 
 export const testContainer2: SongContainer = {
-    variations: [{
+    songData: {
         content: '/test2.mp3',
         containerId: 'testContainerID2',
         id: "testContainer2Variation1",
-    }],
-    selectedVariation: 0,
+    },
     projectID: "testProject1ID",
     id: 'testContainerID2',
     duration: 151,
@@ -34,12 +32,11 @@ export const testContainer2: SongContainer = {
 }
 
 export const testContainer3: SongContainer = {
-    variations: [{
+    songData: {
         content: "/cloudgazing.mp3",
         containerId: 'testContainerID3',
         id: "testcontainer3Variation1",
-    }],
-    selectedVariation: 0,
+    },
     projectID: "testProject2ID",
     id: "testContainerID3",
     duration: 147,
@@ -47,12 +44,11 @@ export const testContainer3: SongContainer = {
 }
 
 export const testContainer4: SongContainer = {
-    variations: [{
+    songData: {
         content: "/scary.mp3",
         containerId: 'testContainerID4',
         id: "testcontainer4Variation1",
-    }],
-    selectedVariation: 0,
+    },
     projectID: "testProject1ID",
     id: "testContainerID4",
     duration: 118,
@@ -60,10 +56,10 @@ export const testContainer4: SongContainer = {
 }
 
 export const testProject: Project = {
-    name: "Rather b dead",
+    name: "noise pollution",
     projectType: "multiple",
     content: [testContainer1, testContainer2, testContainer3, testContainer4],
-    thumbnail: "/ratherbdead.png",
+    thumbnail: "/randomStuff.png",
     totalLength: 123 + 151 + 147 + 118,
     id: "testProject1ID"
 }
@@ -77,7 +73,7 @@ export const testProject2: Project = {
     id: 'testProject2ID'
 }
 
-const DEBUG_LEVEL: number = 1;
+const DEBUG_LEVEL: number = 0;
 
 export const debug = (...messages: any) => {
     if(DEBUG_LEVEL >= 1){

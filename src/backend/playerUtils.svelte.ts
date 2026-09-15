@@ -36,6 +36,9 @@ export type Player = {
 // for some reason, this just doesnt want to function if you already have content loaded. Why? Who knows.
 // nevermind I know now. turns out the freaking
 const getHowlContainer = (song: SongContainer) => {
+    if(!song){
+        return null
+    }
     debug("🚨🚨🚨 instantiating new howl instance 🚨🚨🚨")
     const howlContainer: HowlInstance = $state({
         howl: null,
@@ -62,24 +65,20 @@ const getHowlContainer = (song: SongContainer) => {
     }).load();
 
     debug("HOWL ITSELF IS", howl)
-
     return howlContainer;
 }
 
 export const loadSong = (song: SongContainer) => {
     // selectedSong being true indicates the app is playing song 2, and false is song 1. Switch it here because we're preloading
-
     // these conditionals ensure that null space is replaced first
-    if(!appState.player.songContainer1){
+
+    // one off for when loading a new project
+
+    if(appState.player.selectedSong || !appState.player.songContainer1 && !appState.player.songContainer2){
         appState.player.songContainer1 = getHowlContainer(song);
-    } else if (!appState.player.songContainer2){
-        appState.player.songContainer2 = getHowlContainer(song);
     } else {
-        if(appState.player.selectedSong){
-            appState.player.songContainer1 = getHowlContainer(song);
-        } else {
-            appState.player.songContainer2 = getHowlContainer(song);
-        }
+        appState.player.songContainer2 = getHowlContainer(song);
+
     }
 }
 
@@ -94,6 +93,12 @@ export const loadNextFromQueue = () => {
         appState.player.currentQueue.splice(0, 1);
     } else {
         addNotification("[DEBUG] No data found for queue", "warn", 2000);
+        if(appState.player.selectedSong){
+            appState.player.songContainer1 = null
+        } else {
+            appState.player.songContainer2 = null
+
+        }
     }
 }
 
@@ -175,7 +180,6 @@ export const selectNext = (fromSongEnd: boolean = true) => {
     appState.player.selectedSong = !appState.player.selectedSong;
     if(!(appState.player.selectedSong ? appState.player.songContainer2 : appState.player.songContainer1)){
         stopSong();
-        return;
     } else {
         selectSong(appState.player.selectedSong ? appState.player.songContainer2 : appState.player.songContainer1);
     }
@@ -253,7 +257,7 @@ export const toggleShuffle = () => {
 }
 
 export const loadQueueFromProject = (project: Project) => {
-    debug("\n\n\nInstantiating frmo project from calendar!!!!\n\n\n");
+    debug("\n\n\nInstantiating from project!!!!\n\n\n");
     appState.player.recentlyPlayed.length = 0;
     stopSong();
 
@@ -277,3 +281,12 @@ export const loadQueueFromProject = (project: Project) => {
     selectSong(appState.player.songContainer1);
 }
 
+export const getPlayingID = () => {
+    if(appState.player.currentSong){
+        const song = appState.player.selectedSong ? appState.player.songContainer2 : appState.player.songContainer1;
+        if(song){
+            return song.songData.id
+        }
+    }
+    return "";
+}

@@ -1,13 +1,23 @@
 <script lang="ts">
-    import { Ellipsis, Files, Folder, FolderPlus, Plus } from "@lucide/svelte";
+    import { Ellipsis, Files, Folder, FolderPlus, Plus, Spool } from "@lucide/svelte";
     import { TEST_DATA } from "../../backend/dev.svelte";
     import { appState } from "../../backend/appState.svelte";
     import type { SongContainer } from "../../backend/songUtils.svelte";
-    import { formatSeconds, getPlayingID, getSelectedSong } from "../../backend/playerUtils.svelte";
+    import { formatSeconds, getPlayingID, getSelectedSong, playSongInstantly } from "../../backend/playerUtils.svelte";
 
     let vaultSearchTerm = $state("")
     let vaultSearchMode = $state(false);
     let placeholderText = $state("Search for a project");
+
+    let expanded: SongContainer | null = $state(null);
+
+    const toggleExpanded = (s: SongContainer) => {
+        if(s == expanded){
+            expanded = null;
+        } else {
+            expanded = s;
+        }
+    }
 
 </script>
 
@@ -43,7 +53,7 @@
         <div class="projectLabel">
             <img alt='bleh' src='{project.thumbnail ? project.thumbnail : "/default.png"}'>
             <div class="projectLabelText">
-                <p class='text1'>{project.name}</p>
+                <p class='text1' contenteditable="true" bind:textContent={project.name} autocapitalize="off">{project.name}</p>
                 <p class='text2'>{formatSeconds(project.totalLength, true)}</p>
                 {#if project.projectType == "single"}
                     <p class='text2'>Single</p>
@@ -54,25 +64,25 @@
         </div>
         {#if project.projectType == 'multiple'}
             {#each project.content as songContainer, i}
-                <div class="songDataContainer {getPlayingID() == songContainer.id ? "playing" : ""}">
+                <label class="songDataContainer {getPlayingID() == songContainer.id ? "playing" : ""}" for='play{songContainer.id}'>
                     <p>{i + 1}</p>
                     <div class="songData">
                         <div class="songDataText">
-                            <p class='text1'>{songContainer.name}</p>
+                            <p class='text1' contenteditable="true" bind:textContent={songContainer.name} autocapitalize="off"></p>
                             <p class='text2'>{formatSeconds(songContainer.duration, true)}</p>
                         </div>
 
-                        <button class='songDataButton'>
+                        <button class='songDataButton' onclick={() =>toggleExpanded(songContainer)}>
                             <div class="svgWrapper">
                                 <Ellipsis size=20 />
                             </div>
                         </button>
-
                     </div>
-                </div>
+                </label>
+                <button class='invis' id='play{songContainer.id}' onclick={() => playSongInstantly(songContainer)}>play{songContainer.id}</button>
             {/each}
         {:else}
-             <div class="songDataContainer {getPlayingID() == project.content.id  ? "playing" : ""}">
+             <label class="songDataContainer {getPlayingID() == project.content.id  ? "playing" : ""}" for='play{project.content.id}'>
                 <p>1</p>
                 <div class="songData">
                     <div class="songDataText">
@@ -80,20 +90,35 @@
                         <p class='text2'>{formatSeconds(project.content.duration, true)}</p>
                     </div>
 
-                    <button class='songDataButton'>
+                    <button class='songDataButton' onclick={() =>toggleExpanded(project.content)}>
                         <div class="svgWrapper">
                             <Ellipsis size=20 />
                         </div>
                     </button>
 
                 </div>
-            </div>
+            </label>
+
+            <button class='invis' id='play{project.content.id}' onclick={() => playSongInstantly(project.content)}>play{project.content.id}</button>
+
+
         {/if}
 
     {/each}
 </div>
 
 <style>
+
+    .editContainer {
+        display: flex;
+        flex-direction: column;
+        margin-left: 60px;
+        background-color: white;
+        height: 40px;
+        padding: 10px;
+        box-sizing: border-box;
+    }
+
 
     .btn.main {
         align-items: center;
@@ -167,9 +192,16 @@
         box-sizing: border-box;
     }
 
+    .text1 {
+        outline: none;
+        cursor: text;
+    }
+
     .songDataText .text1 {
         color: var(--text1);
         font-size: 16px;
+
+        min-width: 40px;
     }
 
     .songDataText .text2 {
@@ -213,8 +245,17 @@
     }
 
 
+
     .songDataContainer:hover > p, .songDataContainer:hover .songDataButton * {
         color: var(--text1);
+    }
+
+    .songDataButton:hover * {
+        color: var(--main5) !important;
+    }
+
+    .playing .songDataButton:hover * {
+        color: var(--main6) !important;
     }
 
     .songDataContainer:hover .songData {

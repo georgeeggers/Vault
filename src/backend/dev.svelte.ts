@@ -58,7 +58,7 @@ export const testContainer4: SongContainer = {
 export const testProject: Project = {
     name: "noise pollution",
     projectType: "multiple",
-    content: [testContainer1, testContainer2, testContainer3, testContainer4],
+    content: [testContainer1, testContainer2, testContainer4],
     thumbnail: "/randomStuff.png",
     totalLength: 123 + 151 + 147 + 118,
     id: "testProject1ID"

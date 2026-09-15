@@ -290,3 +290,32 @@ export const getPlayingID = () => {
     }
     return "";
 }
+
+export const playSongInstantly = (s: SongContainer) => {
+
+    if(!appState.player.selectedSong){
+        appState.player.songContainer1 = null;
+        loadSong(s);
+        selectSong(appState.player.songContainer1);
+    } else {
+        appState.player.songContainer2 = null;
+        loadSong(s);
+        selectSong(appState.player.songContainer2);
+    }
+
+
+    if(appState.player.currentSong){
+        stopSong(appState.player.playing);
+    }
+
+
+    if(!(appState.player.selectedSong ? appState.player.songContainer2 : appState.player.songContainer1)){
+        stopSong();
+    } else {
+        selectSong(appState.player.selectedSong ? appState.player.songContainer2 : appState.player.songContainer1);
+    }
+
+    if(appState.player.playing){
+        playSong();
+    }
+}

@@ -5,8 +5,6 @@ import type { Project } from "./collectionUtils.svelte"
 import { getSongPath, type SongContainer } from "./songUtils.svelte"
 import { debug } from "./dev.svelte"
 
-
-
 export type HowlInstance = {
     howl: Howl | null,
     songData: SongContainer,
@@ -104,6 +102,21 @@ export const loadNextFromQueue = () => {
 
 export const getSelectedSong = () => {
     return appState.player.selectedSong ? appState.player.songContainer2 : appState.player.songContainer1;
+}
+
+export const getSelectedSongProject = () => {
+    const d = getSelectedSong();
+    if(d){
+        for(let i of appState.projects){
+            if(i.id == d.songData.songData.containerId){
+                return i; 
+
+            }
+        }
+    }
+    debug("Project not found");
+
+    return null;
 }
 
 export const stopSong = (playStatus: boolean = false) => {

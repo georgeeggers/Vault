@@ -3,7 +3,7 @@ import type { Project } from "./collectionUtils.svelte"
 import type { SongContainer } from "./songUtils.svelte"
 
 export const TEST_DATA = ["/bart.png", "/deadPlants.png", "/default.png", "/randomStuff.png", "/ratherbdead.png"]
-export const SELECTED_SONG = "/ratherbdead.png"
+export const SELECTED_SONG = "/randomStuff.png"
 export const TEST_SONG_DATA = "/test.mp3"
 
 
@@ -60,7 +60,7 @@ export const testProject: Project = {
     projectType: "multiple",
     content: [testContainer1, testContainer2, testContainer4],
     thumbnail: "/randomStuff.png",
-    totalLength: 123 + 151 + 147 + 118,
+    totalLength: 123 + 151 + 118,
     id: "testProject1ID"
 }
 

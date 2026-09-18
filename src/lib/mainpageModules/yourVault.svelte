@@ -3,11 +3,10 @@
     import { TEST_DATA } from "../../backend/dev.svelte";
     import { appState } from "../../backend/appState.svelte";
     import type { SongContainer } from "../../backend/songUtils.svelte";
-    import { formatSeconds, getPlayingID, getSelectedSong, playSongInstantly } from "../../backend/playerUtils.svelte";
+    import { formatSeconds, getPlayingID, getSelectedSong, getSelectedSongProject, playSongInstantly } from "../../backend/playerUtils.svelte";
 
     let vaultSearchTerm = $state("")
     let vaultSearchMode = $state(false);
-    let placeholderText = $state("Search for a project");
 
     let expanded: SongContainer | null = $state(null);
 
@@ -50,7 +49,7 @@
 
     </div>
     {#each appState.projects as project}
-        <div class="projectLabel">
+        <div class="projectLabel {getSelectedSongProject() == project ? "playing" : ""}">
             <img alt='bleh' src='{project.thumbnail ? project.thumbnail : "/default.png"}'>
             <div class="projectLabelText">
                 <p class='text1' contenteditable="true" bind:textContent={project.name} autocapitalize="off">{project.name}</p>
@@ -296,6 +295,10 @@
         display: flex;
         margin-top: 30px;
         align-items: center;
+    }
+
+    .projectLabel.playing {
+        background-color: var(--main5) !important;
     }
 
     .projectLabel img {

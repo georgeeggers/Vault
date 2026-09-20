@@ -1,16 +1,23 @@
 import { Shuffle } from "@lucide/svelte"
 import { appState } from "./appState.svelte"
 import { addNotification } from "./appUtils.svelte"
-import type { Project } from "./collectionUtils.svelte"
-import { getSongPath, type SongContainer } from "./songUtils.svelte"
 import { debug } from "./dev.svelte"
+import { loadSongData, type PlayerProject, type PlayerSongContainer } from "./sql.svelte"
+import { getProjectByID } from "./collectionUtils.svelte"
 
 export type HowlInstance = {
     howl: Howl | null,
-    songData: SongContainer,
+    songData: PlayerSongContainer,
     duration: number,
     loaded: boolean,
     id: string,
+}
+
+export type QueueManager = {
+    currentQueue: PlayerSongContainer[],
+    shuffleQueue: PlayerSongContainer[],
+    recentlyPlayed: PlayerSongContainer[],
+    shuffle: boolean,
 }
 
 export type Player = {
@@ -25,15 +32,19 @@ export type Player = {
     playing: boolean,
     volume: number,
     intervalID: number,
-    shuffle: boolean,
-    currentQueue: SongContainer[],
-    shuffleQueue: SongContainer[],
-    recentlyPlayed: SongContainer[],
+    queueManager: QueueManager
+}
+
+export type PlayerV2 = {
+    preloads: HowlInstance[],
+    loadIndex: number,
+    currentSong: Howl,
+
 }
 
 // for some reason, this just doesnt want to function if you already have content loaded. Why? Who knows.
 // nevermind I know now. turns out the freaking
-const getHowlContainer = (song: SongContainer) => {
+const getHowlContainer = async (song: PlayerSongContainer) => {
     if(!song){
         return null
     }
@@ -47,8 +58,11 @@ const getHowlContainer = (song: SongContainer) => {
     });
     debug("Howl is this before instantiation", $state.snapshot(howlContainer));
 
+    const bleh = await loadSongData(song);
     const howl = new Howl({
-        src: [getSongPath(song)],
+        // @ts-ignore
+        src: bleh.content,
+        format: song.extension,
         volume: appState.player.volume
     }).on('load', () => {
         debug(`😄 onload callback triggered on ${howlContainer.id}. Everything is dandy!`)
@@ -61,34 +75,35 @@ const getHowlContainer = (song: SongContainer) => {
             playSong();
         }
     }).load();
+    console.log(howl);
 
     debug("HOWL ITSELF IS", howl)
     return howlContainer;
 }
 
-export const loadSong = (song: SongContainer) => {
+export const loadSong = async (song: PlayerSongContainer) => {
     // selectedSong being true indicates the app is playing song 2, and false is song 1. Switch it here because we're preloading
     // these conditionals ensure that null space is replaced first
 
     // one off for when loading a new project
 
     if(appState.player.selectedSong || !appState.player.songContainer1 && !appState.player.songContainer2){
-        appState.player.songContainer1 = getHowlContainer(song);
+        appState.player.songContainer1 = await getHowlContainer(song);
     } else {
-        appState.player.songContainer2 = getHowlContainer(song);
+        appState.player.songContainer2 = await getHowlContainer(song);
 
     }
 }
 
-export const loadNextFromQueue = () => {
-    if(appState.player.shuffle && appState.player.shuffleQueue.length > 0){
+export const loadNextFromQueue = async () => {
+    if(appState.player.queueManager.shuffle && appState.player.queueManager.shuffleQueue.length > 0){
         debug("\nAdding from shuffle");
-        loadSong(appState.player.shuffleQueue[0]);
-        appState.player.shuffleQueue.splice(0, 1);
-    } else if (appState.player.currentQueue.length > 0) {
-        debug("\n🤯🤯🤯 Adding from queue", $state.snapshot(appState.player.currentQueue[0]));
-        loadSong(appState.player.currentQueue[0]);
-        appState.player.currentQueue.splice(0, 1);
+        await loadSong(appState.player.queueManager.shuffleQueue[0]);
+        appState.player.queueManager.shuffleQueue.splice(0, 1);
+    } else if (appState.player.queueManager.currentQueue.length > 0) {
+        debug("\n🤯🤯🤯 Adding from queue", $state.snapshot(appState.player.queueManager.currentQueue[0]));
+        await loadSong(appState.player.queueManager.currentQueue[0]);
+        appState.player.queueManager.currentQueue.splice(0, 1);
     } else {
         addNotification("[DEBUG] No data found for queue", "warn", 2000);
         if(appState.player.selectedSong){
@@ -108,7 +123,7 @@ export const getSelectedSongProject = () => {
     const d = getSelectedSong();
     if(d){
         for(let i of appState.projects){
-            if(i.id == d.songData.songData.containerId){
+            if(i.id == d.songData.parentProject){
                 return i; 
 
             }
@@ -236,8 +251,8 @@ export const selectSong = (instance: HowlInstance | null) => {
                 }
             }, 100)
         }
-
     }
+    debug("!!!!!!!! instance is not loaded");
 }
 
 export const updateVolume = () => {
@@ -254,7 +269,7 @@ export const updateVolume = () => {
     }
 }
 
-const shuffle = (queueData: SongContainer[]) => {
+const shuffle = (queueData: PlayerSongContainer[]) => {
   for (let i = queueData.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
     [queueData[i], queueData[j]] = [queueData[j], queueData[i]];
@@ -263,33 +278,29 @@ const shuffle = (queueData: SongContainer[]) => {
 }   
 
 export const toggleShuffle = () => {
-    appState.player.shuffle = !appState.player.shuffle;
-    if(appState.player.shuffle){
-        appState.player.shuffleQueue = shuffle([...appState.player.currentQueue]);
+    appState.player.queueManager.shuffle = !appState.player.queueManager.shuffle;
+    if(appState.player.queueManager.shuffle){
+        appState.player.queueManager.shuffleQueue = shuffle([...appState.player.queueManager.currentQueue]);
     }
 }
 
-export const loadQueueFromProject = (project: Project) => {
+export const loadQueueFromProject = async (project: PlayerProject) => {
     debug("\n\n\nInstantiating from project!!!!\n\n\n");
-    appState.player.recentlyPlayed.length = 0;
+    appState.player.queueManager.recentlyPlayed.length = 0;
     stopSong();
 
-    if(project.projectType == "multiple"){
-        appState.player.currentQueue = [...project.content];
-    } else {
-        appState.player.currentQueue.length = 0;
-        appState.player.currentQueue.push($state.snapshot(project.content));
-    }
+    appState.player.queueManager.currentQueue.length = 0;
+    appState.player.queueManager.currentQueue = [...project.songs];
 
-    if(appState.player.shuffle){
-        appState.player.shuffleQueue = shuffle([...appState.player.currentQueue]);
+    if(appState.player.queueManager.shuffle){
+        appState.player.queueManager.shuffleQueue = shuffle([...appState.player.queueManager.currentQueue]);
     }
 
     appState.player.selectedSong = false;
     appState.player.songContainer1 = null;
     appState.player.songContainer2 = null;
-    loadNextFromQueue();
-    loadNextFromQueue();
+    await loadNextFromQueue();
+    await loadNextFromQueue();
     debug(`\nSong container has at time of load`, $state.snapshot(appState.player.songContainer1));
     selectSong(appState.player.songContainer1);
 }
@@ -304,15 +315,20 @@ export const getPlayingID = () => {
     return "";
 }
 
-export const playSongInstantly = (s: SongContainer) => {
+export const playSongInstantly = async (s: PlayerSongContainer) => {
+
+    appState.player.queueManager.currentQueue.length = 0;
+    appState.player.queueManager.shuffleQueue.length = 0;
+    appState.player.queueManager.recentlyPlayed.length = 0;
+
 
     if(!appState.player.selectedSong){
         appState.player.songContainer1 = null;
-        loadSong(s);
+        await loadSong(s);
         selectSong(appState.player.songContainer1);
     } else {
         appState.player.songContainer2 = null;
-        loadSong(s);
+        await loadSong(s);
         selectSong(appState.player.songContainer2);
     }
 

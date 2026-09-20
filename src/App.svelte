@@ -57,11 +57,12 @@
     width: 100%;
     height: 100px;
     min-height: 100px;
+    z-index: 2;
   }
 
   .mainContentContainer {
     width: 100%;
-    
+    z-index: 1;
   }
 
   .globalArea {
@@ -75,6 +76,7 @@
     width: 100%;
     min-height: 60px;
     height: 60px;
+    z-index: 2;
   }
   
   .contentArea {

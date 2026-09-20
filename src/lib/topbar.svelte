@@ -1,5 +1,5 @@
 <script>
-    import { Home, Maximize, Minus, Search, Settings2, X } from "@lucide/svelte";
+    import { Home, Maximize, Minus, Search, Settings2, Upload, X } from "@lucide/svelte";
     import { getCurrentWindow } from "@tauri-apps/api/window";
     import { replace, router } from "svelte-spa-router";
     import { appState } from "../backend/appState.svelte";
@@ -18,9 +18,9 @@
     </button>
 
 
-    <button class="locationButton" style='margin-left: 40px;' onclick={() => replace('/')}>
-        <div class="svgWrapper" style="{router.location == "/" ? "color: var(--main5);" : ""}">
-            <Home size={ICON_SIZE} fill="currentColor"/>
+    <button class="locationButton" style='margin-left: 40px;' onclick={() => {appState.popupType == 'createNew'; appState.popupShowing = true}}>
+        <div class="svgWrapper">
+            <Upload size={ICON_SIZE} />
         </div>
     </button>
 

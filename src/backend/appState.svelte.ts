@@ -1,17 +1,20 @@
-import type { Project } from "./collectionUtils.svelte"
-import { testProject, testProject2 } from "./dev.svelte"
 import type { Player } from "./playerUtils.svelte"
+import type { PlayerProject } from "./sql.svelte"
 
 export type AppState = {
     searchTerm: string,
     displayPlaybar: boolean,
+    popupShowing: boolean,
+    popupType: "createNew",
     player: Player,
-    projects: Project[],
+    projects: PlayerProject[],
 }
 
 export const appState: AppState = $state({
     searchTerm: "",
     displayPlaybar: true,
+    popupShowing: false,
+    popupType: "createNew",
     player: {
         songContainer1: null,
         songContainer2: null,
@@ -24,10 +27,12 @@ export const appState: AppState = $state({
         playing: false,
         volume: .25,
         intervalID: -1,
-        shuffle: false,
-        currentQueue: [],
-        shuffleQueue: [],
-        recentlyPlayed: [],
+        queueManager: {
+            shuffle: false,
+            currentQueue: [],
+            shuffleQueue: [],
+            recentlyPlayed: [],
+        }
     },
-    projects: [testProject, testProject2]
+    projects: []
 })

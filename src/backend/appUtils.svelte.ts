@@ -39,8 +39,8 @@ export const random = (min: number, max: number): number => {
  * Gets a random 15 digit long id string compatible with pocketbase
  * @returns string
  */
-export const getID = (): string => {
-    let id = "";
+export const getID = (prefix: string = ""): string => {
+    let id = prefix;
     for(let i = 0; i < 15; i++){
         id += encoder[random(0, encoder.length - 1)];
     }
@@ -69,6 +69,9 @@ export const addNotification = (body: string, notifType: string, time = 10000) =
     } else if (notifType == "success"){
         textColor = "var(--secondary4)";
         backgroundColor = "var(--secondary1)";
+    } else if (notifType == "info"){
+        textColor = "var(--text7)";
+        backgroundColor = "var(--bg2)";
     } else {
         textColor = "var(--main4)";
         backgroundColor = "var(--main1)";

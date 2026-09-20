@@ -1,8 +1,10 @@
 <script lang="ts">
     import { appState } from "../backend/appState.svelte";
-    import { SELECTED_SONG } from "../backend/dev.svelte";
-    import { getSelectedVariation } from "../backend/songUtils.svelte";
+    import { getProjectByID } from "../backend/collectionUtils.svelte";
     import PlayerControls from "./mainpageModules/playerControls.svelte";
+    import CurrentPlayingThumbnail from "./modules/currentPlayingThumbnail.svelte";
+    import Ghost from "./modules/ghost.svelte";
+    import PlaceholderImage from "./modules/placeholderImage.svelte";
 
 
 
@@ -13,7 +15,12 @@
 
 <div class="playbar">
     <div class="songInfo">
-        <img alt='bleh' src="{SELECTED_SONG}">
+        
+        <div class="imageContainer">
+            <CurrentPlayingThumbnail size='80px' />
+        </div>
+
+
         <div class="songInfoText">
             {#if !appState.player.selectedSong}
                 {#if appState.player.songContainer1?.loaded}
@@ -54,12 +61,6 @@
     box-sizing: border-box;
     align-items: center;
     width: 33%;
-}
-
-.songInfo img {
-    height: 100%;
-    width: auto;
-    aspect-ratio: 1/1;
 }
 
 .songInfoText .text1 {

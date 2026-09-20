@@ -12,29 +12,29 @@ pub fn run() {
 "CREATE TABLE projects (
     id TEXT PRIMARY KEY,
     projectType TEXT NOT NULL,
-    totalLength INTEGER,
-    thumbnail BLOB,
+    totalLength REAL,
+    thumbnail TEXT,
     name TEXT
 );
 CREATE TABLE songContainer (
     id TEXT PRIMARY KEY,
     name TEXT,
-    duration INTEGER,
-    FOREIGN KEY (id) REFERENCES projects (id) ON DELETE CASCADE
+    duration REAL,
+    extension TEXT, 
+    ordering INTEGER,
+    bpm INTEGER,
+    parentProject TEXT NOT NULL,
+    FOREIGN KEY (parentProject) REFERENCES projects (id) ON DELETE CASCADE
 );
 CREATE TABLE songData (
     id TEXT PRIMARY KEY,
-    content BLOB, 
-    FOREIGN KEY (id) REFERENCES songContainer (id) ON DELETE CASCADE
-);
-CREATE TABLE songDataOptions (
-    id TEXT PRIMARY KEY,
+    content TEXT, 
     lyrics TEXT,
-    bpm INTEGER,
-    FOREIGN KEY (id) REFERENCES songData (id) ON DELETE CASCADE
+    parentContainer TEXT,
+    FOREIGN KEY (parentContainer) REFERENCES songContainer (id) ON DELETE CASCADE
 );",
             kind: MigrationKind::Up
-        }
+        },
     ];
 
     tauri::Builder::default()

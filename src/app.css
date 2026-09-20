@@ -135,6 +135,15 @@
     src: url("/Roboto.ttf");
 }
 
+@font-face {
+    font-family: "OldLondon";
+    src: url("/OldLondon.otf");
+}
+
+.oldLondon {
+    font-family: "OldLondon" !important;
+}
+
 * {
     touch-action: manipulation;
     -ms-touch-action: manipulation;

@@ -13,6 +13,14 @@ Favorites or pinned
  | [ ] Pin certain albums or songs or whatever
  | [ ] Maybe use a bento-style layout for these. Probably gonna have to generate this somehow with javascript
 
+
+
+!!! Currently, i load all songs instantly. All preloading does is turn the resource url into howls. 
+    switch architecture back to the songcontainer and song data system so we wont have to load an insane amount of data all at once
+
+theres also just a billion issues with the loading of songs through queues and whatnot. Lots of work to do...
+
+
 # extras
 
 spatial audio selector

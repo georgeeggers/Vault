@@ -1,21 +1,23 @@
 <script lang='ts'>
     import { Plus, Settings2 } from "@lucide/svelte";
-    import { TEST_DATA } from "../../backend/dev.svelte";
     import { appState } from "../../backend/appState.svelte";
     import { formatSeconds, loadQueueFromProject } from "../../backend/playerUtils.svelte";
     import { replace } from "svelte-spa-router";
-    import type { Project } from "../../backend/collectionUtils.svelte";
     import { addNotification } from "../../backend/appUtils.svelte";
+    import PlaceholderImage from "../modules/placeholderImage.svelte";
 
 </script>
 <div class="containers">
     {#each appState.projects as p}
         <label class="song" for='edit{p.id}'>
-            {#if p.thumbnail}
-                <img src="{p.thumbnail}" alt='poop'>
-            {:else}
-                <img src="/mood.png" alt='poop'>
-            {/if}
+            <div class="imgContainer">
+                {#if p.thumbnail}
+                    <img src="{p.thumbnail}" alt='bleh'>
+                {:else}
+                    <PlaceholderImage />
+                {/if}
+            </div>
+
             <button id='edit{p.id}' onclick={() => loadQueueFromProject(p)} class='invis'>Edit project</button>
             <div class="text">
                 <p>{p.name}</p>
@@ -24,7 +26,7 @@
                     {#if p.projectType == "single"}
                         <p>Single</p>
                     {:else}
-                        <p>{p.content.length} tracks</p>
+                        <p>{p.songs.length} tracks</p>
 
                     {/if}
                 </div>
@@ -37,6 +39,9 @@
 </div>
 
 <style>
+
+
+
 
     .informationArea {
         width: 100%;
@@ -70,7 +75,13 @@
         height: fit-content;
     }
 
-    .song img {
+    .imgContainer {
+        width: 100%;
+        height: auto;
+        aspect-ratio: 1/1;
+    }
+
+    .imgContainer img {
         width: 100%;
         height: auto;
         aspect-ratio: 1/1;

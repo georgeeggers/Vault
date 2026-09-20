@@ -1,16 +1,16 @@
 <script lang="ts">
     import { Ellipsis, Files, Folder, FolderPlus, Plus, Spool } from "@lucide/svelte";
-    import { TEST_DATA } from "../../backend/dev.svelte";
     import { appState } from "../../backend/appState.svelte";
-    import type { SongContainer } from "../../backend/songUtils.svelte";
     import { formatSeconds, getPlayingID, getSelectedSong, getSelectedSongProject, playSongInstantly } from "../../backend/playerUtils.svelte";
+    import type { PlayerSongContainer } from "../../backend/sql.svelte";
+    import PlaceholderImage from "../modules/placeholderImage.svelte";
 
     let vaultSearchTerm = $state("")
     let vaultSearchMode = $state(false);
 
-    let expanded: SongContainer | null = $state(null);
+    let expanded: PlayerSongContainer | null = $state(null);
 
-    const toggleExpanded = (s: SongContainer) => {
+    const toggleExpanded = (s: PlayerSongContainer) => {
         if(s == expanded){
             expanded = null;
         } else {
@@ -40,7 +40,7 @@
                 </div>
             </button>
         </label>
-        <button class='btn main'>
+        <button class='btn main' onclick={() => {appState.popupType = 'createNew'; appState.popupShowing = true}}>
             <div class="svgWrapper">
                 <Plus size=16 />
             </div>
@@ -49,75 +49,49 @@
 
     </div>
     {#each appState.projects as project}
-        <div class="projectLabel {getSelectedSongProject() == project ? "playing" : ""}">
-            <img alt='bleh' src='{project.thumbnail ? project.thumbnail : "/default.png"}'>
+        <div class="projectLabel">
+            <div class="imgContainer">
+                {#if project.thumbnail}
+                    <img alt='bleh' src='{project.thumbnail}'>
+                {:else}
+                    <PlaceholderImage  />
+                {/if}
+            </div>
+
             <div class="projectLabelText">
-                <p class='text1' contenteditable="true" bind:textContent={project.name} autocapitalize="off">{project.name}</p>
+                <p class='text1'>{project.name}</p>
                 <p class='text2'>{formatSeconds(project.totalLength, true)}</p>
                 {#if project.projectType == "single"}
                     <p class='text2'>Single</p>
                 {:else}
-                    <p class='text2'>{project.content.length} tracks</p>
+                    <p class='text2'>{project.songs.length} tracks</p>
                 {/if}
             </div>
         </div>
-        {#if project.projectType == 'multiple'}
-            {#each project.content as songContainer, i}
-                <label class="songDataContainer {getPlayingID() == songContainer.id ? "playing" : ""}" for='play{songContainer.id}'>
-                    <p>{i + 1}</p>
-                    <div class="songData">
-                        <div class="songDataText">
-                            <p class='text1' contenteditable="true" bind:textContent={songContainer.name} autocapitalize="off"></p>
-                            <p class='text2'>{formatSeconds(songContainer.duration, true)}</p>
-                        </div>
-
-                        <button class='songDataButton' onclick={() =>toggleExpanded(songContainer)}>
-                            <div class="svgWrapper">
-                                <Ellipsis size=20 />
-                            </div>
-                        </button>
-                    </div>
-                </label>
-                <button class='invis' id='play{songContainer.id}' onclick={() => playSongInstantly(songContainer)}>play{songContainer.id}</button>
-            {/each}
-        {:else}
-             <label class="songDataContainer {getPlayingID() == project.content.id  ? "playing" : ""}" for='play{project.content.id}'>
-                <p>1</p>
+        {#each project.songs as songContainer, i}
+            <label class="songDataContainer {getPlayingID() == songContainer.id ? "playing" : ""}" for='play{songContainer.id}'>
+                <p>{i + 1}</p>
                 <div class="songData">
                     <div class="songDataText">
-                        <p class='text1'>{project.content.name}</p>
-                        <p class='text2'>{formatSeconds(project.content.duration, true)}</p>
+                        <p class='text1'>{songContainer.name}</p>
+                        <p class='text2'>{formatSeconds(songContainer.duration, true)}</p>
                     </div>
 
-                    <button class='songDataButton' onclick={() =>toggleExpanded(project.content)}>
+                    <button class='songDataButton' onclick={() =>toggleExpanded(songContainer)}>
                         <div class="svgWrapper">
                             <Ellipsis size=20 />
                         </div>
                     </button>
-
                 </div>
             </label>
+            <button class='invis' id='play{songContainer.id}' onclick={() => playSongInstantly(songContainer)}>play{songContainer.id}</button>
+        {/each}
 
-            <button class='invis' id='play{project.content.id}' onclick={() => playSongInstantly(project.content)}>play{project.content.id}</button>
-
-
-        {/if}
 
     {/each}
 </div>
 
 <style>
-
-    .editContainer {
-        display: flex;
-        flex-direction: column;
-        margin-left: 60px;
-        background-color: white;
-        height: 40px;
-        padding: 10px;
-        box-sizing: border-box;
-    }
-
 
     .btn.main {
         align-items: center;
@@ -189,11 +163,6 @@
         display: flex;
         flex-direction: column;
         box-sizing: border-box;
-    }
-
-    .text1 {
-        outline: none;
-        cursor: text;
     }
 
     .songDataText .text1 {
@@ -301,11 +270,17 @@
         background-color: var(--main5) !important;
     }
 
-    .projectLabel img {
-        width: 128px;
-        height: auto;
+    .projectLabel .imgContainer {
+        max-width: 128px;
         max-height: 128px;
+        min-width: 128px;
+        min-height: 128px;
+    }
+
+    .projectLabel .imgContainer img {
         aspect-ratio: 1/1;
+        width: 100%;
+        height: auto;
     }
 
     .projectLabelText {

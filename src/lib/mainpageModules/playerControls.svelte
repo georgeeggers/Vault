@@ -1,10 +1,9 @@
 <script lang="ts">
     import { onDestroy, onMount } from "svelte";
-    import { TEST_SONG_DATA, testContainer1, testContainer2 } from "../../backend/dev.svelte";
     import { Howl, Howler } from "howler";
     import { ChevronFirst, ChevronLast, ChevronLeft, ChevronRight, Cylinder, FastForward, Pause, Play, Rewind, Shuffle, SkipBack, SkipForward, Volume, Volume1, Volume2, VolumeX } from "@lucide/svelte";
     import { appState } from "../../backend/appState.svelte";
-    import { formatSeconds, getSelectedSong, loadSong, playPause, seek, selectNext, selectSong, stopSeek, stopSong, toggleShuffle, updateVolume, type HowlInstance } from "../../backend/playerUtils.svelte";
+    import { formatSeconds, loadSong, playPause, seek, selectNext, selectSong, stopSeek, stopSong, toggleShuffle, updateVolume, type HowlInstance } from "../../backend/playerUtils.svelte";
 
 
     onDestroy(() => {
@@ -21,7 +20,7 @@
         <div class="playerButtons">
 
             <button id="shuffle" style='margin-left: auto;' onclick={toggleShuffle}>
-                <div class="svgWrapper" style=' {appState.player.shuffle ? "color: var(--main5);" : ""}'>
+                <div class="svgWrapper" style=' {appState.player.queueManager.shuffle ? "color: var(--main5);" : ""}'>
                     <Shuffle size=18 />
                 </div>
             </button>

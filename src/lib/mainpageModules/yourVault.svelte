@@ -49,45 +49,46 @@
 
     </div>
     {#each appState.projects as project}
-        <div class="projectLabel">
-            <div class="imgContainer">
-                {#if project.thumbnail}
-                    <img alt='bleh' src='{project.thumbnail}'>
-                {:else}
-                    <PlaceholderImage  />
-                {/if}
-            </div>
-
-            <div class="projectLabelText">
-                <p class='text1'>{project.name}</p>
-                <p class='text2'>{formatSeconds(project.totalLength, true)}</p>
-                {#if project.projectType == "single"}
-                    <p class='text2'>Single</p>
-                {:else}
-                    <p class='text2'>{project.songs.length} tracks</p>
-                {/if}
-            </div>
-        </div>
-        {#each project.songs as songContainer, i}
-            <label class="songDataContainer {getPlayingID() == songContainer.id ? "playing" : ""}" for='play{songContainer.id}'>
-                <p>{i + 1}</p>
-                <div class="songData">
-                    <div class="songDataText">
-                        <p class='text1'>{songContainer.name}</p>
-                        <p class='text2'>{formatSeconds(songContainer.duration, true)}</p>
-                    </div>
-
-                    <button class='songDataButton' onclick={() =>toggleExpanded(songContainer)}>
-                        <div class="svgWrapper">
-                            <Ellipsis size=20 />
-                        </div>
-                    </button>
+        {#if project.id != "yourVault"}
+            <div class="projectLabel">
+                <div class="imgContainer">
+                    {#if project.thumbnail}
+                        <img alt='bleh' src='{project.thumbnail}'>
+                    {:else}
+                        <PlaceholderImage  />
+                    {/if}
                 </div>
-            </label>
-            <button class='invis' id='play{songContainer.id}' onclick={() => playSongInstantly(songContainer)}>play{songContainer.id}</button>
-        {/each}
 
+                <div class="projectLabelText">
+                    <p class='text1'>{project.name}</p>
+                    <p class='text2'>{formatSeconds(project.totalLength, true)}</p>
+                    {#if project.projectType == "single"}
+                        <p class='text2'>Single</p>
+                    {:else}
+                        <p class='text2'>{project.songs.length} tracks</p>
+                    {/if}
+                </div>
+            </div>
+            {#each project.songs as songContainer, i}
+                <label class="songDataContainer {getPlayingID() == songContainer.id ? "playing" : ""}" for='play{songContainer.id}'>
+                    <p>{i + 1}</p>
+                    <div class="songData">
+                        <div class="songDataText">
+                            <p class='text1'>{songContainer.name}</p>
+                            <p class='text2'>{formatSeconds(songContainer.duration, true)}</p>
+                        </div>
 
+                        <button class='songDataButton' onclick={() =>toggleExpanded(songContainer)}>
+                            <div class="svgWrapper">
+                                <Ellipsis size=20 />
+                            </div>
+                        </button>
+                    </div>
+                </label>
+                <button class='invis' id='play{songContainer.id}' onclick={() => playSongInstantly(songContainer)}>play{songContainer.id}</button>
+            {/each}
+
+        {/if}
     {/each}
 </div>
 
@@ -264,10 +265,6 @@
         display: flex;
         margin-top: 30px;
         align-items: center;
-    }
-
-    .projectLabel.playing {
-        background-color: var(--main5) !important;
     }
 
     .projectLabel .imgContainer {

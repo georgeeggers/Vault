@@ -4,6 +4,7 @@ import { addNotification } from "./appUtils.svelte"
 import { debug } from "./dev.svelte"
 import { loadSongData, type PlayerProject, type PlayerSongContainer } from "./sql.svelte"
 import { getProjectByID } from "./collectionUtils.svelte"
+import { replace } from "svelte-spa-router"
 
 export type HowlInstance = {
     howl: Howl | null,
@@ -75,7 +76,6 @@ const getHowlContainer = async (song: PlayerSongContainer) => {
             playSong();
         }
     }).load();
-    console.log(howl);
 
     debug("HOWL ITSELF IS", howl)
     return howlContainer;
@@ -346,5 +346,14 @@ export const playSongInstantly = async (s: PlayerSongContainer) => {
 
     if(appState.player.playing){
         playSong();
+    }
+}
+
+export const toggleMiniplayer = () => {
+    appState.miniPlayer = !appState.miniPlayer;
+    if(appState.miniPlayer){
+        replace("/miniplayer");
+    } else {
+        replace("/")
     }
 }

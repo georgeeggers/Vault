@@ -229,7 +229,6 @@ export const loadSongData = async (container: PlayerSongContainer) => {
         }
 
         const songData = getPlayerSongDataFromDBSongData(result[0]);
-        console.log(songData.content);
         return songData;
     }
 
@@ -296,10 +295,23 @@ export const getDBDataFromProject = async (p: PlayerProject, songData: PlayerSon
 export const loadProjects = async () => {
     await loadDb();
     if(db){
+        appState.projects.length = 0;
+        appState.projects.push({
+            id: "yourVault",
+            projectType: 'multiple',
+            totalLength: 0,
+            name: "Your Vault",
+            songs: [],
+            thumbnail: '/default.png'
+        })
         const result: DBProject[] = await db.select(`SELECT * FROM projects`);
         for(let i of result){
             const subResult: DBSongContainer[] = await db.select(`SELECT * FROM songContainer WHERE parentProject = $1`, [i.id]);
             appState.projects.push(getPlayerProjectFromDBProject(i, subResult));
+            for(let i of subResult){
+                appState.projects[0].totalLength += i.duration;
+                appState.projects[0].songs.push(i);
+            }
         }
     }
 }

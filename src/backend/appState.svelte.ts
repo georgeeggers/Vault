@@ -6,6 +6,7 @@ export type AppState = {
     displayPlaybar: boolean,
     popupShowing: boolean,
     popupType: "createNew",
+    miniPlayer: boolean,
     player: Player,
     projects: PlayerProject[],
 }
@@ -15,6 +16,7 @@ export const appState: AppState = $state({
     displayPlaybar: true,
     popupShowing: false,
     popupType: "createNew",
+    miniPlayer: false,
     player: {
         songContainer1: null,
         songContainer2: null,
@@ -25,7 +27,7 @@ export const appState: AppState = $state({
         duration: 0,
         playingID: "",
         playing: false,
-        volume: .25,
+        volume: 1.0,
         intervalID: -1,
         queueManager: {
             shuffle: false,

@@ -1,6 +1,5 @@
 <script>
     import Router from "svelte-spa-router";
-    import Sidebar from "./lib/sidebar.svelte";
     import Topbar from "./lib/topbar.svelte";
 
     import { routes } from "./routes.svelte";
@@ -9,16 +8,26 @@
     import { notifications } from "./backend/appUtils.svelte";
     import { fly } from "svelte/transition";
     import { X } from "@lucide/svelte";
+    import { stopSong } from "./backend/playerUtils.svelte";
+    import { onDestroy } from "svelte";
+
+
+    onDestroy(() => {
+        if(appState.player.currentSong){
+            stopSong();
+        }
+    })
 
 </script>
 
 <div class="globalArea">
+  {#if !appState.miniPlayer}
+    <div class="topbarContainer">
+      <Topbar />
+    </div>
+  {/if}
 
-  <div class="topbarContainer">
-    <Topbar />
-  </div>
-
-  <div class="contentArea" style="{appState.displayPlaybar ? "height: calc(100% - 160px);" : ""}">
+  <div class="contentArea" style="{appState.displayPlaybar ? "height: calc(100% - 160px);" : ""} {appState.miniPlayer ? "height: 100%;" : ""}">
   
     <div class="mainContentContainer">
       <Router {routes} />
@@ -26,7 +35,7 @@
 
   </div>
 
-  {#if appState.displayPlaybar}
+  {#if appState.displayPlaybar && !appState.miniPlayer}
     <div class="playbarContainer">
       <Playbar />
     </div>

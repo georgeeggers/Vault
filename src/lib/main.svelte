@@ -40,7 +40,6 @@
             </div>
 
             <button class='btn main' onclick={loadProjects}>Test load</button>
-            <button class='btn fail' onclick={deleteAllLocal}>Delete Everything</button>
             <p>{appState.player.queueManager.currentQueue.length}</p>
         </div>
 

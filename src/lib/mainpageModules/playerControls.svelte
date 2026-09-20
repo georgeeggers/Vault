@@ -1,16 +1,9 @@
 <script lang="ts">
-    import { onDestroy, onMount } from "svelte";
+    import { onDestroy } from "svelte";
     import { Howl, Howler } from "howler";
-    import { ChevronFirst, ChevronLast, ChevronLeft, ChevronRight, Cylinder, FastForward, Pause, Play, Rewind, Shuffle, SkipBack, SkipForward, Volume, Volume1, Volume2, VolumeX } from "@lucide/svelte";
+    import { ChevronFirst, ChevronLast, ChevronLeft, ChevronRight, Cylinder, FastForward, Pause, Play, Rewind, Shuffle, SkipBack, SkipForward, TvMinimal, Volume, Volume1, Volume2, VolumeX } from "@lucide/svelte";
     import { appState } from "../../backend/appState.svelte";
-    import { formatSeconds, loadSong, playPause, seek, selectNext, selectSong, stopSeek, stopSong, toggleShuffle, updateVolume, type HowlInstance } from "../../backend/playerUtils.svelte";
-
-
-    onDestroy(() => {
-        if(appState.player.currentSong){
-            stopSong();
-        }
-    })
+    import { formatSeconds, loadSong, playPause, seek, selectNext, selectSong, stopSeek, stopSong, toggleMiniplayer, toggleShuffle, updateVolume, type HowlInstance } from "../../backend/playerUtils.svelte";
 
 </script>
 
@@ -19,7 +12,7 @@
     <div class="playerControls">
         <div class="playerButtons">
 
-            <button id="shuffle" style='margin-left: auto;' onclick={toggleShuffle}>
+            <button id="shuffle" class='playbarButton' style='margin-left: auto;' onclick={toggleShuffle}>
                 <div class="svgWrapper" style=' {appState.player.queueManager.shuffle ? "color: var(--main5);" : ""}'>
                     <Shuffle size=18 />
                 </div>
@@ -27,13 +20,13 @@
 
 
 
-            <button id="previous">
+            <button id="previous" class='playbarButton'>
                 <div class="svgWrapper">
-                    <Rewind size=20 fill='currentColor' strokeWidth={0}/>
+                    <Rewind size=20 fill='currentColor' class='playbarButton' strokeWidth={0}/>
                 </div>
             </button>
 
-            <button id="playPause" onclick={playPause}>
+            <button id="playPause" class='playbarButton' onclick={playPause}>
                 {#if !appState.player.playing}
                     <div class="svgWrapper">
                         <Play size=20 fill='currentColor' strokeWidth={0}/>
@@ -45,10 +38,16 @@
                 {/if}
             </button>
 
-            <button id="skip" onclick={() => selectNext(false)}>
+            <button id="skip" class='playbarButton' onclick={() => selectNext(false)}>
                 <div class="svgWrapper">
                     <FastForward size=20 fill='currentColor' strokeWidth={0}/>
                 </div>
+            </button>
+
+            <button id="toggleMini" class='playbarButton' onclick={toggleMiniplayer} style='margin-left: auto;'>
+                <div class="svgWrapper"  style=' {appState.miniPlayer ? "color: var(--main5);" : ""}'>
+                    <TvMinimal size=20 />
+                </div> 
             </button>
 
             <div id="volumeController">
@@ -138,6 +137,10 @@
         scale: 1.05;
     }
 
+    .playbarButton:hover * {
+        color: var(--main5);
+    }
+
     #playPause {
         width: 32px;
         height: 32px;
@@ -151,14 +154,12 @@
         color: var(--main5);
     }
 
-    #skip *, #previous *, #shuffle * {
+    .playbarButton * {
         color: var(--text7);
         transition: color .1s;
     }
 
-    #skip:hover *, #previous:hover *, #shuffle:hover * {
-        color: var(--main5);
-    }
+
 
     .playerControls {
         width: 100%;
@@ -258,7 +259,6 @@
     #volumeController {
         display: flex;
         flex-direction: row;
-        margin-left: auto;
         gap: 2px;
 
     }

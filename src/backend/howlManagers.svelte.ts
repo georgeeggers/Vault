@@ -55,8 +55,7 @@ export const getHowlInstanceV2 = (songData: PlayerSongData, songContainer: Playe
     const howl = new Howl({
         src: songData.content,
         format: songContainer.extension,
-        volume: appState.player.volume,
-        html5: true,
+        volume: appState.player.volume
     }).on('load', () => {
         // only initialize the rest of this when the howl instance is actually loaded
         howlContainer.duration = howl.duration();
@@ -64,8 +63,7 @@ export const getHowlInstanceV2 = (songData: PlayerSongData, songContainer: Playe
         howlContainer.howl = howl;
     }).on('end', () => {
         // when the song ends, just select the next song in the queue
-        stopSong(songContainer);
-        unloadSong(songContainer);
+        playNextSongFromQueue(appState.player.queueManager.shuffle ? appState.player.queueManager.shuffleQueue : appState.player.queueManager.currentQueue);
     }).load();
 
     return howlContainer;
@@ -251,9 +249,9 @@ export const playSong = (song: PlayerSongContainer) => {
     }
 }
 
-export const playNextSongFromQueue = (queue: PlayerSongContainer[]) => {
-
+export const playNextSongFromQueue = async (queue: PlayerSongContainer[]) => {
     if(loadManager.currentSong){
+        
         stopSong(loadManager.currentSong.song);
         stopPlaybarTracking();
         if(loadManager.preloads.length == loadManager.maxSize){

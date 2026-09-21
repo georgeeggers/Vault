@@ -1,7 +1,6 @@
 <script>
     import { appState } from "../backend/appState.svelte";
-    import { loadManager, loadNextSongsFromQueue, loadQueueFromProjectV2, loadSong, playNextSongFromQueue } from "../backend/howlManagers.svelte";
-    import { deleteAllLocal, getDBDataFromProject, loadProjects, saveOrUpdateProject, saveOrUpdateSong } from "../backend/sql.svelte";
+    import { loadManager } from "../backend/howlManagers.svelte";
     import LyricSyncTest from "./mainpageModules/lyricSyncTest.svelte";
     import NewProjectPopup from "./mainpageModules/newProjectPopup.svelte";
     import ProjectView from "./mainpageModules/projectView.svelte";

@@ -1,7 +1,7 @@
 <script lang='ts'>
     import { ChevronDown, ChevronUp, Disc3, Music, Plus, SaveCheck, Trash2, Upload, X } from "@lucide/svelte";
     import { formatSeconds } from "../../backend/playerUtils.svelte";
-    import { getDBDataFromProject, saveOrUpdateProject, saveOrUpdateSong, saveOrUpdateSongData, type PlayerProject, type PlayerSongContainer, type PlayerSongData } from "../../backend/sql.svelte";
+    import { getDBDataFromProject, loadProjects, saveOrUpdateProject, saveOrUpdateSong, saveOrUpdateSongData, type PlayerProject, type PlayerSongContainer, type PlayerSongData } from "../../backend/sql.svelte";
     import { addNotification, getID } from "../../backend/appUtils.svelte";
     import { onMount } from "svelte";
     import PlaceholderImage from "../modules/placeholderImage.svelte";
@@ -22,7 +22,7 @@
 
     const selectProjectType = (pType: "single" | "multiple") => {
         if(saving){
-            return;
+            return
         }
         songs.length = 0;
         projectType = pType;
@@ -35,7 +35,7 @@
     async function handleFileChange(e: Event, target: number){
 
         if(saving){
-            return;
+            return
         }
 
         let file;
@@ -78,7 +78,7 @@
 
     const addSong = () => {
         if(saving){
-            return;
+            return
         }
         const id = getID("S_");
         const temp: PlayerSongContainer = {
@@ -119,7 +119,7 @@
     const moveSong = (index: number, moveBack: boolean = true) => {
 
         if(saving){
-            return;
+            return
         }
 
         if(index > 0 && moveBack){
@@ -178,9 +178,11 @@
 
     let saving = $state(false);
 
+    let saveProgress = $state(-1);
+    let maxSaveTime = $state(0);
     let attemptSave = async () => {
         if(saving){
-            return;
+            return
         }
         resetErrors();
 
@@ -218,6 +220,7 @@
 
         } else {
             saving = true;
+            saveProgress = -1;
             addNotification("Attempting Save", 'info');
             const project: PlayerProject = {
                 id: projectID,
@@ -230,17 +233,23 @@
 
             const response = await getDBDataFromProject(project, songData);
 
+            maxSaveTime = 1 + response.songs.length + response.data.length;
             await saveOrUpdateProject(response.project);
+            saveProgress++;
             for(let i of response.songs){
                 await saveOrUpdateSong(i);
+                saveProgress++;
+
             }
 
             for(let i of response.data){
                 await saveOrUpdateSongData(i);
+                saveProgress++;
             }
 
             saving = false;
             appState.popupShowing = false;
+            loadProjects();
             addNotification("Project Saved!", 'succcess');
         }
     }
@@ -316,9 +325,9 @@
 
                 <div class="projectColumn">
                     {#if projectType == "multiple"}
-                        <input type='text' bind:value={projectName} placeholder="Project" id='nameProject' autocapitalize="off" autocorrect="off" autocomplete='off' class='{errors.projectName ? "error" : ""}'>
+                        <input type='text' bind:value={projectName} placeholder="Project" id='nameProject' autocapitalize="off" autocorrect="off" autocomplete='off' class='{errors.projectName ? "error" : "noBorder"} {saveProgress >= 1 ? "saveProgressComplete" : ""}'>
                     {:else}
-                        <input type='text' bind:value={songs[0].name} placeholder="Project" id='nameProject' autocapitalize="off" autocorrect="off" autocomplete='off' class=''>
+                        <input type='text' bind:value={songs[0].name} placeholder="Project" id='nameProject' autocapitalize="off" autocorrect="off" autocomplete='off' class='{errors.projectName ? "error" : "noBorder"} {saveProgress >= 1 ? "saveProgressComplete" : ""}'>
                     {/if}
 
                     <div class="projectLabelText">
@@ -339,7 +348,7 @@
             {#if projectType == 'multiple'}
                 <div class="projectRow">
                     <p>Tracks</p>
-                    <button class='btn main {errors.projectLength ? "error" : ""}' onclick={addSong} >
+                    <button class='btn main {errors.projectLength ? "error" : "noBorder"}' onclick={addSong} >
                         <div class="svgWrapper">
                             <Plus size=16 />
                         </div>
@@ -353,12 +362,12 @@
                     <p>{String(i + 1).padStart(String(songs.length).length, '0')}</p>
                     <div class="songData">
                         <div class="songDataText">
-                            <input class='songName {errors.songErrors[i].name ? "error" : ""}' placeholder="Track {i + 1}" bind:value={song.name} autocapitalize="off" autocorrect="off" autocomplete='off'>
+                            <input class='songName {errors.songErrors[i].name ? "error" : "noBorder"} {saveProgress >= i + 2 ? "saveProgressComplete" : ""}' placeholder="Track {i + 1}" bind:value={song.name} autocapitalize="off" autocorrect="off" autocomplete='off'>
                             <p class='text2'>{formatSeconds(song.duration, true)}</p>
                         </div>
 
 
-                        <label class="uploadHandler {errors.songErrors[i].content ? "error" : ""}" style='margin-left: auto;' for='uploadFile{song.id}'
+                        <label class="uploadHandler {errors.songErrors[i].content ? "error" : "noBorder"} {saveProgress >= i + 2 + songs.length ? "saveProgressComplete" : ""}" style='margin-left: auto;' for='uploadFile{song.id}'
                             ondrop={(e) => {
                                 e.preventDefault();
                                 handleFileChange(e, i);
@@ -425,19 +434,32 @@
             {/each}
             <div class="projectRow" style='margin-top: auto;'>
 
-                <button class='btn fail' style='' onclick={() => {appState.popupShowing = false}}>
-                    <div class="svgWrapper">
-                        <X size=20 />
-                    </div>
-                    <p>Exit</p>
-                </button>
+                {#if !saving}
+                    <button class='btn fail' style='' onclick={() => {appState.popupShowing = false}}>
+                        <div class="svgWrapper">
+                            <X size=20 />
+                        </div>
+                        <p>Exit</p>
+                    </button>
+                {/if}
 
-                <button class='btn main' style='margin-left: auto;' onclick={attemptSave}>
-                    <div class="svgWrapper">
-                        <SaveCheck size=20 />
+                {#if !saving}
+                    <button class='btn main' style='margin-left: auto; width: 125px;' onclick={attemptSave}>
+                        <div class="svgWrapper">
+                            <SaveCheck size=20 />
+                        </div>
+                        <p>Save Project</p>
+                    </button>
+                {:else}
+                    <div id="saveProgress">
+                        <div id="saveProgressBar" style='width: calc((100% - 20px)* {saveProgress / maxSaveTime});'>
+
+                        </div>
+                        <div id="saveProgressBarIncomplete">
+                            
+                        </div>
                     </div>
-                    <p>Save Project</p>
-                </button>
+                {/if}
             </div>
 
         </div>
@@ -447,6 +469,33 @@
 
 
 <style>
+
+    #saveProgress {
+        width: 125px;
+        height: 40px;
+        background-color: var(--bg1);
+        margin-left: auto;
+        position: relative;
+        padding: 10px;
+        box-sizing: border-box;
+    }
+
+    #saveProgressBarIncomplete {
+        width: 100%;
+        display: flex;
+        align-items: center;
+        background-color: var(--bg0);
+        height: 100%;
+    }
+
+    #saveProgressBar {
+        left: 10px;
+        top: 10px;
+        height: 20px;
+        background-color: var(--main5);
+        position: absolute;
+        transition: width .1s ease;
+    }
 
     .uploadHandler {
         width: 40px;
@@ -662,8 +711,16 @@
         justify-content: center;
     }
 
+    .noBorder {
+        border: 1px solid transparent;
+    }
+
     .error {
         border: 1px solid var(--fail5) !important;
+    }
+
+    .saveProgressComplete {
+        border: 1px solid var(--main5) !important;
     }
 
     @media (max-width: 750px){

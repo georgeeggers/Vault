@@ -15,10 +15,9 @@ Favorites or pinned
 
 
 
-!!! Currently, i load all songs instantly. All preloading does is turn the resource url into howls. 
-    switch architecture back to the songcontainer and song data system so we wont have to load an insane amount of data all at once
+users should be able to just drag and drop music files onto the app screen. it should recognize if you're dragging multiple or a single music file, and prompt the user what they want to do
 
-theres also just a billion issues with the loading of songs through queues and whatnot. Lots of work to do...
+add progress bars and whatnot for the saving process when creating new projects
 
 
 # extras
@@ -33,4 +32,5 @@ background images
     upload background images, or have them be based on current playing cover art
 
 lyric processing
+    have a lyric staging menu where people can type out lyrics, and syncrhonize them line by line
     

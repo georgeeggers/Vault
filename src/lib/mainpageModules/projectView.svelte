@@ -1,10 +1,11 @@
 <script lang='ts'>
     import { Plus, Settings2 } from "@lucide/svelte";
     import { appState } from "../../backend/appState.svelte";
-    import { formatSeconds, loadQueueFromProject } from "../../backend/playerUtils.svelte";
+    import { formatSeconds } from "../../backend/playerUtils.svelte";
     import { replace } from "svelte-spa-router";
     import { addNotification } from "../../backend/appUtils.svelte";
     import PlaceholderImage from "../modules/placeholderImage.svelte";
+    import { loadQueueFromProjectV2 } from "../../backend/howlManagers.svelte";
 
 </script>
 <div class="containers">
@@ -18,7 +19,7 @@
                 {/if}
             </div>
 
-            <button id='edit{p.id}' onclick={() => loadQueueFromProject(p)} class='invis'>Edit project</button>
+            <button id='edit{p.id}' onclick={() => loadQueueFromProjectV2(p)} class='invis'>Edit project</button>
             <div class="text">
                 <p>{p.name}</p>
                 <div class="informationArea">

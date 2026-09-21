@@ -1,6 +1,7 @@
 <script lang="ts">
     import { appState } from "../backend/appState.svelte";
     import { getProjectByID } from "../backend/collectionUtils.svelte";
+    import { loadManager } from "../backend/howlManagers.svelte";
     import PlayerControls from "./mainpageModules/playerControls.svelte";
     import CurrentPlayingThumbnail from "./modules/currentPlayingThumbnail.svelte";
     import Ghost from "./modules/ghost.svelte";
@@ -22,22 +23,13 @@
 
 
         <div class="songInfoText">
-            {#if !appState.player.selectedSong}
-                {#if appState.player.songContainer1?.loaded}
-                    <p class='text1'>{appState.player.songContainer1.songData.name}</p>
-                    <p class='text2'>Song collection</p>
-                {:else}
-                    <p class='text1'>Loading...</p>
-                    <p class='text2'>Song collection</p>
-                {/if}
+            {#if loadManager.currentSong}
+                {@const parentProject = getProjectByID(loadManager.currentSong.song.parentProject)}
+                <p class='text1'>{loadManager.currentSong.song.name}</p>
+                <p class='text2'>{parentProject?.name}</p>
             {:else}
-                {#if appState.player.songContainer2?.loaded}
-                    <p class='text1'>{appState.player.songContainer2.songData.name}</p>
-                    <p class='text2'>Song collection</p>
-                {:else}
-                    <p class='text1'>Loading...</p>
-                    <p class='text2'>Song collection</p>
-                {/if}  
+                <p class='text1'>Loading...</p>
+                <p class='text2'>Loading...</p>
             {/if}
         </div>
     </div>

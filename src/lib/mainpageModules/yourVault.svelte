@@ -1,9 +1,10 @@
 <script lang="ts">
     import { Ellipsis, Files, Folder, FolderPlus, Plus, Spool } from "@lucide/svelte";
     import { appState } from "../../backend/appState.svelte";
-    import { formatSeconds, getPlayingID, getSelectedSong, getSelectedSongProject, playSongInstantly } from "../../backend/playerUtils.svelte";
+    import { formatSeconds } from "../../backend/playerUtils.svelte";
     import type { PlayerSongContainer } from "../../backend/sql.svelte";
     import PlaceholderImage from "../modules/placeholderImage.svelte";
+    import { getPlayingID, playSongInstantly } from "../../backend/howlManagers.svelte";
 
     let vaultSearchTerm = $state("")
     let vaultSearchMode = $state(false);

@@ -1,5 +1,6 @@
 <script>
     import { appState } from "../backend/appState.svelte";
+    import { loadManager, loadNextSongsFromQueue, loadQueueFromProjectV2, loadSong, playNextSongFromQueue } from "../backend/howlManagers.svelte";
     import { deleteAllLocal, getDBDataFromProject, loadProjects, saveOrUpdateProject, saveOrUpdateSong } from "../backend/sql.svelte";
     import LyricSyncTest from "./mainpageModules/lyricSyncTest.svelte";
     import NewProjectPopup from "./mainpageModules/newProjectPopup.svelte";
@@ -39,8 +40,13 @@
                 <CurrentPlayingThumbnail size='280px' />
             </div>
 
-            <button class='btn main' onclick={loadProjects}>Test load</button>
-            <p>{appState.player.queueManager.currentQueue.length}</p>
+            {#each loadManager.preloads as p}
+                <p style='margin-top: 10px;'>{p.song.name} - {p.song.id}</p>
+                <p>Howl - {p.howlInstance ? 'instantiated' : "null"}</p>
+                <p>Playing - {p.playing}</p>
+                <p>SongContainer - {p.song ? 'instantiated' : "null"}</p>
+                <p>SongData - {p.songData ? 'instantiated' : "null"}</p>
+            {/each}
         </div>
 
     </div>

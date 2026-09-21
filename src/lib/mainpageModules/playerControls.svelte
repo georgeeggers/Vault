@@ -3,7 +3,8 @@
     import { Howl, Howler } from "howler";
     import { ChevronFirst, ChevronLast, ChevronLeft, ChevronRight, Cylinder, FastForward, Pause, Play, Rewind, Shuffle, SkipBack, SkipForward, TvMinimal, Volume, Volume1, Volume2, VolumeX } from "@lucide/svelte";
     import { appState } from "../../backend/appState.svelte";
-    import { formatSeconds, loadSong, playPause, seek, selectNext, selectSong, stopSeek, stopSong, toggleMiniplayer, toggleShuffle, updateVolume, type HowlInstance } from "../../backend/playerUtils.svelte";
+    import { formatSeconds, seek, stopSeek, toggleMiniplayer, toggleShuffle } from "../../backend/playerUtils.svelte";
+    import { loadManager, playNextSongFromQueue, playPause, updateVolume } from "../../backend/howlManagers.svelte";
 
 </script>
 
@@ -27,7 +28,7 @@
             </button>
 
             <button id="playPause" class='playbarButton' onclick={playPause}>
-                {#if !appState.player.playing}
+                {#if !loadManager.playing}
                     <div class="svgWrapper">
                         <Play size=20 fill='currentColor' strokeWidth={0}/>
                     </div>
@@ -38,7 +39,7 @@
                 {/if}
             </button>
 
-            <button id="skip" class='playbarButton' onclick={() => selectNext(false)}>
+            <button id="skip" class='playbarButton' onclick={() => playNextSongFromQueue(appState.player.queueManager.shuffle ? appState.player.queueManager.shuffleQueue : appState.player.queueManager.currentQueue)}>
                 <div class="svgWrapper">
                     <FastForward size=20 fill='currentColor' strokeWidth={0}/>
                 </div>

@@ -1,5 +1,6 @@
 <script>
     import { appState } from "../backend/appState.svelte";
+    import { loadManager } from "../backend/howlManagers.svelte";
     import PlayerControls from "./mainpageModules/playerControls.svelte";
     import CurrentPlayingThumbnail from "./modules/currentPlayingThumbnail.svelte";
     import Topbar from "./topbar.svelte";
@@ -19,19 +20,10 @@
         <CurrentPlayingThumbnail size="max(150vw, 150vh);"/>
     </div>
     <div class="playerArea">
-  
-        {#if !appState.player.selectedSong}
-            {#if appState.player.songContainer1?.loaded}
-                <p class='songName hideTillHover'>{appState.player.songContainer1.songData.name}</p>
-            {:else}
-                <p class='songName hideTillHover'>Loading...</p>
-            {/if}
+        {#if loadManager.currentSong}
+            <p class='songName hideTillHover'>{loadManager.currentSong.song.name}</p>
         {:else}
-            {#if appState.player.songContainer2?.loaded}
-                <p class='songName hideTillHover'>{appState.player.songContainer2.songData.name}</p>
-            {:else}
-                <p class='songName hideTillHover'>Loading...</p>
-            {/if}  
+            <p class='songName hideTillHover'>Loading...</p>
         {/if}
 
 

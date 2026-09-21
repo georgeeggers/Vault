@@ -1,36 +1,31 @@
 <script lang='ts'>
     import { appState } from "../../backend/appState.svelte";
     import { getProjectByID } from "../../backend/collectionUtils.svelte";
+    import { loadManager } from "../../backend/howlManagers.svelte";
     import Ghost from "./ghost.svelte";
     import PlaceholderImage from "./placeholderImage.svelte";
 
     export let size: string;
-
+    export let id: string = "";
 </script>
 
 <div class="imageContainer" style='width: {size}; min-width: {size}; height: {size}; min-height: {size};'>
-    {#if !appState.player.selectedSong}
-        {#if appState.player.songContainer1?.loaded}
-            {@const url = getProjectByID(appState.player.songContainer1.songData.parentProject)?.thumbnail}
-            {#if url && url != ""}
-                <img src='{url}' alt='bleh' />
-            {:else}
-                <PlaceholderImage />
-            {/if}
+    {#if id != ""}
+        {@const url = getProjectByID(id)?.thumbnail}
+        {#if url && url != ""}
+            <img src='{url}' alt='bleh' />
         {:else}
-            <Ghost />
+            <PlaceholderImage />
+        {/if}
+    {:else if loadManager.currentSong}
+        {@const url = getProjectByID(loadManager.currentSong.song.parentProject)?.thumbnail}
+        {#if url && url != ""}
+            <img src='{url}' alt='bleh' />
+        {:else}
+            <PlaceholderImage />
         {/if}
     {:else}
-        {#if appState.player.songContainer2?.loaded}
-            {@const url = getProjectByID(appState.player.songContainer2.songData.parentProject)?.thumbnail}
-            {#if url && url != ""}
-                <img src='{url}' alt='bleh' />
-            {:else}
-                <PlaceholderImage />
-            {/if}
-        {:else}
-            <Ghost />
-        {/if}
+        <Ghost />
     {/if}
 </div>
 

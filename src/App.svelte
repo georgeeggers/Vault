@@ -8,13 +8,21 @@
     import { notifications } from "./backend/appUtils.svelte";
     import { fly } from "svelte/transition";
     import { X } from "@lucide/svelte";
-    import { stopSong } from "./backend/playerUtils.svelte";
-    import { onDestroy } from "svelte";
+    import { onDestroy, onMount } from "svelte";
+    import { loadManager, stopSong, unloadSongAtStart } from "./backend/howlManagers.svelte";
+    import { loadProjects } from "./backend/sql.svelte";
 
+    onMount(() => {
+      console.log("We just loading here. Switch out for another place when we eventually get onboarding working");
+      loadProjects();
+    })
 
     onDestroy(() => {
-        if(appState.player.currentSong){
-            stopSong();
+        if(loadManager.currentSong){
+          stopSong(loadManager.currentSong.song)
+        }
+        while(loadManager.preloads.length > 0){
+          unloadSongAtStart();
         }
     })
 

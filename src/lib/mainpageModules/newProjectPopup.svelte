@@ -1,6 +1,6 @@
 <script lang='ts'>
     import { ChevronDown, ChevronUp, Disc3, Music, Plus, SaveCheck, Trash2, Upload, X } from "@lucide/svelte";
-    import { formatSeconds, playSongInstantly } from "../../backend/playerUtils.svelte";
+    import { formatSeconds } from "../../backend/playerUtils.svelte";
     import { getDBDataFromProject, saveOrUpdateProject, saveOrUpdateSong, saveOrUpdateSongData, type PlayerProject, type PlayerSongContainer, type PlayerSongData } from "../../backend/sql.svelte";
     import { addNotification, getID } from "../../backend/appUtils.svelte";
     import { onMount } from "svelte";

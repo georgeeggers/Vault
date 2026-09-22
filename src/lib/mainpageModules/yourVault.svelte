@@ -1,22 +1,59 @@
 <script lang="ts">
-    import { Ellipsis, Files, Folder, FolderPlus, Plus, Spool } from "@lucide/svelte";
+    import { Ellipsis, Files, Folder, FolderPlus, Plus, Search, Spool } from "@lucide/svelte";
     import { appState } from "../../backend/appState.svelte";
     import { formatSeconds } from "../../backend/playerUtils.svelte";
-    import type { PlayerSongContainer } from "../../backend/sql.svelte";
     import PlaceholderImage from "../modules/placeholderImage.svelte";
     import { getPlayingID, playSongInstantly } from "../../backend/howlManagers.svelte";
+    import type { PlayerProject, PlayerSongContainer } from "../../backend/sql.svelte";
+    import { debug } from "../../backend/dev.svelte";
 
-    let vaultSearchTerm = $state("")
-    let vaultSearchMode = $state(false);
+    let vaultSearchTerm = $state("");
 
-    let expanded: PlayerSongContainer | null = $state(null);
-
-    const toggleExpanded = (s: PlayerSongContainer) => {
-        if(s == expanded){
-            expanded = null;
-        } else {
-            expanded = s;
-        }
+    const sortProjects = (projects: PlayerProject[], searchTerm: string) => {
+        return projects.filter((a) => {
+            for(let i of searchTerm.split(" ")){
+                if(a.name.toLowerCase().includes(searchTerm.toLowerCase())){
+                    return true;
+                } else if (i.toLowerCase().startsWith('totallength>')){
+                    try {
+                        const part = i.split(">")[1];
+                        if(a.totalLength >= parseInt(part)){
+                            return true;
+                        }
+                    } catch {
+                        debug("No parts found");
+                    }
+                } else if (i.startsWith('totalLength<')){
+                    try {
+                        const part = i.split("<")[1];
+                        if(a.totalLength <= parseInt(part)){
+                            return true;
+                        }
+                    } catch {
+                        debug("No parts found");
+                    }
+                } else if (i.startsWith('tracks>')){
+                    try {
+                        const part = i.split(">")[1];
+                        if(a.songs.length >= parseInt(part)){
+                            return true;
+                        }
+                    } catch {
+                        debug("No parts found");
+                    }
+                } else if (i.startsWith('tracks<')){
+                    try {
+                        const part = i.split("<")[1];
+                        if(a.songs.length >= parseInt(part)){
+                            return true;
+                        }
+                    } catch {
+                        debug("No parts found");
+                    }
+                }
+            }
+            return false;
+        })
     }
 
 </script>
@@ -24,22 +61,10 @@
 <div class="yourVault">
     <div class="vaultSearchControls">
         <label class="vaultSearchContainer" for='vaultInput'>
-            <input bind:value={vaultSearchTerm} placeholder="{vaultSearchMode ? "Search for a song" : "Search for a project"}" id='vaultInput'/>
-            <div class="spacer" style='height: 20px; border-left: 2px solid var(--text7);'>
-            </div>
-            <button class="searchTypeToggle" onclick={() => {vaultSearchMode = !vaultSearchMode}}>
-                <div class="svgWrapper">
-                    {#if !vaultSearchMode}
-                        <div class="svgWrapper">
-                            <Folder size=20 />
-                        </div>
-                    {:else}
-                        <div class="svgWrapper">
-                            <Files size=20 />
-                        </div>
-                    {/if}
+                <div class="svgWrapper" style='color: var(--text7);'>
+                    <Search size=20 />
                 </div>
-            </button>
+            <input bind:value={vaultSearchTerm} placeholder="Search..." id='vaultInput' autocapitalize="off" autocomplete="off" autocorrect="off"/>
         </label>
         <button class='btn main' onclick={() => {appState.popupType = 'createNew'; appState.popupShowing = true}}>
             <div class="svgWrapper">
@@ -49,7 +74,7 @@
         </button>
 
     </div>
-    {#each appState.projects as project}
+    {#each sortProjects(appState.projects, vaultSearchTerm) as project}
         {#if project.id != "yourVault"}
             <div class="projectLabel">
                 <div class="imgContainer">
@@ -79,7 +104,7 @@
                             <p class='text2'>{formatSeconds(songContainer.duration, true)}</p>
                         </div>
 
-                        <button class='songDataButton' onclick={() =>toggleExpanded(songContainer)}>
+                        <button class='songDataButton'>
                             <div class="svgWrapper">
                                 <Ellipsis size=20 />
                             </div>
@@ -144,6 +169,7 @@
         align-items: center;
         height: 100%;
         background-color: var(--bg1);
+        padding-left: 10px;
     }
 
     .vaultSearchContainer input {
@@ -301,7 +327,7 @@
         color: var(--text4);
     }
 
-    @media (max-width: 675px){
+    @media (max-width: 715px){
         .vaultSearchControls {
             flex-direction: column;
             height: fit-content;

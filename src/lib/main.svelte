@@ -4,6 +4,7 @@
     import LyricSyncTest from "./mainpageModules/lyricSyncTest.svelte";
     import NewProjectPopup from "./mainpageModules/newProjectPopup.svelte";
     import ProjectView from "./mainpageModules/projectView.svelte";
+    import Queue from "./mainpageModules/queue.svelte";
     import YourVault from "./mainpageModules/yourVault.svelte";
     import CurrentPlayingThumbnail from "./modules/currentPlayingThumbnail.svelte";
 
@@ -39,12 +40,23 @@
                 <CurrentPlayingThumbnail size='280px' />
             </div>
 
+            <p>{loadManager.currentSong ? loadManager.currentSong.song.name : ""}</p>
+
+            <div class="queueContainer">
+                <Queue />
+            </div>
+
         </div>
 
     </div>
 </div>
 
 <style>
+
+    .queueContainer {
+        width: 100%;
+        height: calc(100% - 305px);
+    }
 
     .mainModulesContainer {
         width: 100%;

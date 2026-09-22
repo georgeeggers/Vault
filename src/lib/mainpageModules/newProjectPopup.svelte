@@ -21,6 +21,18 @@
         projectID = getID("P_");
     })
 
+    let hoveringQueue: number[] = $state([]);
+
+    const hover = (id: number) => {
+        hoveringQueue.push(id);
+    }
+
+    const unhover = () => {
+        hoveringQueue.pop();
+    }
+
+
+
     const selectProjectType = (pType: "single" | "multiple") => {
         if(saving){
             return
@@ -59,7 +71,7 @@
     }
 
     async function handleFileChange(e: Event, target: number){
-
+        e.preventDefault();
         if(saving){
             return
         }
@@ -69,7 +81,6 @@
             // @ts-ignore
             files = e.target.files;
         } else if (e.type == "drop"){
-            e.preventDefault();
             // @ts-ignore
             files = e.dataTransfer.files;
         }
@@ -448,7 +459,18 @@
             {/each}
 
             {#if projectType == "multiple"}
-                <input  type='file' id='quickUpload'
+                <label id='multiUpload' for='quickUpload' class='{hoveringQueue.includes(-2) ? "dragging" : ""}'
+                    ondragenter={() => hover(99)}
+                    ondragleave={unhover}
+                    ondragend={unhover}
+                >
+                    <div class="svgWrapper" style='color: var(--text1);'>
+                        <Upload size=20 />
+                    </div>
+                    <p style='color: var(--text1);'>Upload Multiple</p>
+                </label>
+                <input type='file' id='quickUpload'
+                    class='invis'
                     multiple
                     accept="audio/*"
                     onchange={(event) => handleFileChange(event, -2)}
@@ -493,6 +515,22 @@
 
 
 <style>
+
+    #multiUpload {
+        height: 100px;
+        padding: 10px;
+        box-sizing: border-box;
+        align-items: center;
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+        cursor: pointer;
+        transition: background-color .25s;
+    }
+
+    #multiUpload:hover, #multiUpload.dragging {
+        background-color: var(--bg1);
+    }
 
     #saveProgress {
         width: 125px;

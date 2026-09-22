@@ -4,12 +4,10 @@ use tauri_plugin_sql::{Migration, MigrationKind};
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
-    let migrations = vec![
-        Migration {
-            version: 1,
-            description: "intialize_database",
-            sql: 
-"CREATE TABLE projects (
+    let migrations = vec![Migration {
+        version: 1,
+        description: "intialize_database",
+        sql: "CREATE TABLE projects (
     id TEXT PRIMARY KEY,
     projectType TEXT NOT NULL,
     totalLength REAL,
@@ -33,9 +31,8 @@ CREATE TABLE songData (
     parentContainer TEXT,
     FOREIGN KEY (parentContainer) REFERENCES songContainer (id) ON DELETE CASCADE
 );",
-            kind: MigrationKind::Up
-        },
-    ];
+        kind: MigrationKind::Up,
+    }];
 
     tauri::Builder::default()
         .plugin(tauri_plugin_store::Builder::new().build())

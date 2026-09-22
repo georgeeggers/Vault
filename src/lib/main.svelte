@@ -39,13 +39,6 @@
                 <CurrentPlayingThumbnail size='280px' />
             </div>
 
-            {#each loadManager.preloads as p}
-                <p style='margin-top: 10px;'>{p.song.name} - {p.song.id}</p>
-                <p>Howl - {p.howlInstance ? 'instantiated' : "null"}</p>
-                <p>Playing - {p.playing}</p>
-                <p>SongContainer - {p.song ? 'instantiated' : "null"}</p>
-                <p>SongData - {p.songData ? 'instantiated' : "null"}</p>
-            {/each}
         </div>
 
     </div>

@@ -61,6 +61,10 @@ const loadDb = async () => {
     }
 }
 
+export const uInt8ArrayToUrl = (input: Uint8Array<ArrayBuffer>) => {
+    return URL.createObjectURL(new Blob([input]));
+}
+
 const b64ToFileURL = (input: string) => {
     // @ts-ignore
     let parts = input.split(' ');

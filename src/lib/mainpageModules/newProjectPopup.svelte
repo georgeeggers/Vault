@@ -1,11 +1,12 @@
 <script lang='ts'>
-    import { ChevronDown, ChevronUp, Disc3, Music, Plus, SaveCheck, Trash2, Upload, X } from "@lucide/svelte";
+    import { ChevronDown, ChevronUp, Disc3, FrownIcon, Music, Plus, SaveCheck, Trash2, Upload, X } from "@lucide/svelte";
     import { formatSeconds } from "../../backend/playerUtils.svelte";
-    import { getDBDataFromProject, loadProjects, saveOrUpdateProject, saveOrUpdateSong, saveOrUpdateSongData, type PlayerProject, type PlayerSongContainer, type PlayerSongData } from "../../backend/sql.svelte";
+    import { getDBDataFromProject, loadProjects, saveOrUpdateProject, saveOrUpdateSong, saveOrUpdateSongData, uInt8ArrayToUrl, type PlayerProject, type PlayerSongContainer, type PlayerSongData } from "../../backend/sql.svelte";
     import { addNotification, getID } from "../../backend/appUtils.svelte";
-    import { onMount } from "svelte";
+    import { onDestroy, onMount } from "svelte";
     import PlaceholderImage from "../modules/placeholderImage.svelte";
     import { appState } from "../../backend/appState.svelte";
+
 
     let stage = $state(0);
     let projectType: "single" | "multiple" = $state("single");
@@ -16,7 +17,7 @@
     let songs: PlayerSongContainer[] = $state([]);
     let songData: PlayerSongData[] = $state([]);
 
-    onMount(() => {
+    onMount(async () => {
         projectID = getID("P_");
     })
 
@@ -32,48 +33,59 @@
         stage = 1;
     }
 
+    const updateSongInformation = (target: number, file: any) => {
+        songData[target].content = URL.createObjectURL(file);
+
+        songs[target].extension = file.type.split("/")[1];
+        if(songs[target].name == ""){
+            songs[target].name = file.name;
+        }
+        // all this just gets the duration of the song
+        var audio = document.createElement('audio');
+        var reader = new FileReader();
+        if (file) {
+            reader.onload = function (e) {
+                // @ts-ignore
+                audio.src = e.target.result;
+                audio.addEventListener('loadedmetadata', function(){
+                    const duration = audio.duration;
+                    songs[target].duration = duration;
+
+                },false);
+            }
+        }
+
+        reader.readAsDataURL(file);
+    }
+
     async function handleFileChange(e: Event, target: number){
 
         if(saving){
             return
         }
-
-        let file;
+        console.log(e);
+        let files;
         if(e.type == "change"){
             // @ts-ignore
-            file = e.target.files[0];
+            files = e.target.files;
         } else if (e.type == "drop"){
             e.preventDefault();
             // @ts-ignore
-            file = e.dataTransfer.files[0];
+            files = e.dataTransfer.files;
         }
 
-        if(target == -1){
-            thumbnailUrl = URL.createObjectURL(file);
-        } else {
-            songData[target].content = URL.createObjectURL(file);
-
-            songs[target].extension = file.type.split("/")[1];
-            if(songs[target].name == ""){
-                songs[target].name = file.name;
+        for(let file of files){
+            if(target == -2){
+                const index = songs.length;
+                addSong();
+                updateSongInformation(index, file);
+            } else if(target == -1){
+                thumbnailUrl = URL.createObjectURL(file);
+            } else {            
+                updateSongInformation(target, file);
             }
-            // all this just gets the duration of the song
-            var audio = document.createElement('audio');
-            var reader = new FileReader();
-            if (e.target && file) {
-                reader.onload = function (e) {
-                    // @ts-ignore
-                    audio.src = e.target.result;
-                    audio.addEventListener('loadedmetadata', function(){
-                        const duration = audio.duration;
-                        songs[target].duration = duration;
-
-                    },false);
-                }
-            }
-
-            reader.readAsDataURL(file);
         }
+
     };
 
     const addSong = () => {
@@ -257,6 +269,7 @@
 </script>
 
 <div class="newProjectPopup">
+
     {#if stage == 0}
         <div class="projectTypeSelector">
             <button class="typeButton" onclick={() => selectProjectType('single')}>
@@ -317,7 +330,9 @@
                         </div>
                     </div>
                 </label>
-                <input type='file' id='uploadThumbnail' class='invis'
+                <input type='file' 
+                    class='invis'
+                    id='uploadThumbnail'
                     accept="image/*"
                     onchange={(event) => handleFileChange(event, -1)}
                     ondrop={(e) => handleFileChange(e, -1)}
@@ -420,7 +435,7 @@
 
                         {#if projectType == "multiple"}
 
-                            <button class="uploadHandler" onclick={() => {songs.splice(i, 1); errors.songErrors.splice(i, 1)}}>
+                            <button class="uploadHandler" onclick={() => {songs.splice(i, 1); songData.splice(i, 1); errors.songErrors.splice(i, 1)}}>
                                 <div class="svgWrapper">
                                     <Trash2 size=20/>
                                 </div>
@@ -430,8 +445,17 @@
 
                     </div>
                 </div>
-
             {/each}
+
+            {#if projectType == "multiple"}
+                <input  type='file' id='quickUpload'
+                    multiple
+                    accept="audio/*"
+                    onchange={(event) => handleFileChange(event, -2)}
+                    ondrop={(e) => handleFileChange(e, -2)}
+                >
+            {/if}
+
             <div class="projectRow" style='margin-top: auto;'>
 
                 {#if !saving}

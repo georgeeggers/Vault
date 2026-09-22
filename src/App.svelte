@@ -1,4 +1,4 @@
-<script>
+<script lang='ts'>
     import Router from "svelte-spa-router";
     import Topbar from "./lib/topbar.svelte";
 
@@ -12,7 +12,7 @@
     import { loadManager, stopSong, unloadSongAtStart } from "./backend/howlManagers.svelte";
     import { loadProjects } from "./backend/sql.svelte";
 
-    onMount(() => {
+    onMount(async () => {
       console.log("We just loading here. Switch out for another place when we eventually get onboarding working");
       loadProjects();
     })

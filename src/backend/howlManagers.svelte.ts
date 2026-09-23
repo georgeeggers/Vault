@@ -26,6 +26,10 @@ export type LoadManager = {
     maxTimeToWaitForLoad: number,
     retryInterval: number,
     playing: boolean,
+    positional: boolean,
+    positionX: number,
+    positionY: number,
+    positionMagnitude: number,
 }
 
 export let loadManager: LoadManager = $state({
@@ -35,6 +39,10 @@ export let loadManager: LoadManager = $state({
     maxTimeToWaitForLoad: 10000,
     retryInterval: 100,
     playing: false,
+    positional: false,
+    positionX: 0,
+    positionY: 0,
+    positionMagnitude: 1,
 });
 
 export const getHowlInstanceV2 = (songData: PlayerSongData, songContainer: PlayerSongContainer) => {
@@ -65,6 +73,10 @@ export const getHowlInstanceV2 = (songData: PlayerSongData, songContainer: Playe
         // when the song ends, just select the next song in the queue
         playNextSongFromQueue(appState.player.queueManager.shuffle ? appState.player.queueManager.shuffleQueue : appState.player.queueManager.currentQueue);
     }).load();
+
+    if(loadManager.positional){
+        howl.pos(loadManager.positionX, 0, loadManager.positionY);
+    }
 
     return howlContainer;
 }

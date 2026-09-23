@@ -21,15 +21,6 @@
         projectID = getID("P_");
     })
 
-    let hoveringQueue: number[] = $state([]);
-
-    const hover = (id: number) => {
-        hoveringQueue.push(id);
-    }
-
-    const unhover = () => {
-        hoveringQueue.pop();
-    }
 
 
 
@@ -459,10 +450,23 @@
             {/each}
 
             {#if projectType == "multiple"}
-                <label id='multiUpload' for='quickUpload' class='{hoveringQueue.includes(-2) ? "dragging" : ""}'
-                    ondragenter={() => hover(99)}
-                    ondragleave={unhover}
-                    ondragend={unhover}
+                <label id='multiUpload' for='quickUpload'
+                    ondrop={(e) => {
+                        e.preventDefault();
+                        handleFileChange(e, -2);
+                    }}
+
+                    ondragover={(e) => {
+                        e.preventDefault();
+                    }}
+
+                    ondragenter={(e) => {
+                        e.preventDefault()
+                    }}
+
+                    ondragleave={(e) => {
+                        e.preventDefault()
+                    }}           
                 >
                     <div class="svgWrapper" style='color: var(--text1);'>
                         <Upload size=20 />
@@ -528,7 +532,7 @@
         transition: background-color .25s;
     }
 
-    #multiUpload:hover, #multiUpload.dragging {
+    #multiUpload:hover {
         background-color: var(--bg1);
     }
 

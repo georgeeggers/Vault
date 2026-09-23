@@ -6,7 +6,9 @@
     import ProjectView from "./mainpageModules/projectView.svelte";
     import Queue from "./mainpageModules/queue.svelte";
     import YourVault from "./mainpageModules/yourVault.svelte";
+    import AudioLines from "./modules/audioLines.svelte";
     import CurrentPlayingThumbnail from "./modules/currentPlayingThumbnail.svelte";
+    import PositionalAudioSelector from "./modules/positionalAudioSelector.svelte";
 
 
 </script>
@@ -27,6 +29,13 @@
     <div class="mainModulesContainer">
 
         <div class="mainModules scrollOverflow">
+
+            <PositionalAudioSelector />
+
+            <div class="audioLinesContainer" style='width: 140px; height: 140px; min-width: 140px; min-height: 140px;'>
+                <AudioLines numOfLines={10} speed={250} bind:playing={loadManager.playing} />
+            </div>
+
             <ProjectView />
             <YourVault />
             <LyricSyncTest />
@@ -45,6 +54,7 @@
             <div class="queueContainer">
                 <Queue />
             </div>
+
 
         </div>
 

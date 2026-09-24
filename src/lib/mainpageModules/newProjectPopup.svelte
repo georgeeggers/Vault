@@ -6,6 +6,7 @@
     import { onDestroy, onMount } from "svelte";
     import PlaceholderImage from "../modules/placeholderImage.svelte";
     import { appState } from "../../backend/appState.svelte";
+    import { calcTempo } from "../../backend/bpmGuessing";
 
 
     let stage = $state(0);
@@ -14,8 +15,31 @@
     let projectName = $state("");
     let projectID = $state("");
 
-    let songs: PlayerSongContainer[] = $state([]);
-    let songData: PlayerSongData[] = $state([]);
+    let URLS: string[] = $state([]);
+
+    onDestroy(() => {
+
+        // attempt to clean up as many object urls as we can to help prevent memory leaks :)
+        for(let i of URLS){
+            URL.revokeObjectURL(i);
+            console.log(i);
+            uploadData.length = 0;
+        }
+    });
+
+    type UploadDataContainer = {
+        song: PlayerSongContainer,
+        songData: PlayerSongData,
+        errors: {
+            name: boolean,
+            content: boolean,
+        },
+        fullyReady: boolean
+    }
+
+
+
+    let uploadData: UploadDataContainer[] = $state([]);
 
     onMount(async () => {
         projectID = getID("P_");
@@ -28,7 +52,7 @@
         if(saving){
             return
         }
-        songs.length = 0;
+        uploadData.length = 0;
         projectType = pType;
         if(pType == "single"){
             addSong();
@@ -36,12 +60,12 @@
         stage = 1;
     }
 
-    const updateSongInformation = (target: number, file: any) => {
-        songData[target].content = URL.createObjectURL(file);
-
-        songs[target].extension = file.type.split("/")[1];
-        if(songs[target].name == ""){
-            songs[target].name = file.name;
+    const updateSongInformation = async (target: number, file: any) => {
+        uploadData[target].songData.content = URL.createObjectURL(file);
+        URLS.push(uploadData[target].songData.content)
+        uploadData[target].song.extension = file.type.split("/")[1];
+        if(uploadData[target].song.name == ""){
+            uploadData[target].song.name = file.name;
         }
         // all this just gets the duration of the song
         var audio = document.createElement('audio');
@@ -52,13 +76,19 @@
                 audio.src = e.target.result;
                 audio.addEventListener('loadedmetadata', function(){
                     const duration = audio.duration;
-                    songs[target].duration = duration;
+                    uploadData[target].song.duration = duration;
 
                 },false);
             }
+            const result = await calcTempo(file);
+            uploadData[target].song.bpm = Math.round(result);
         }
 
-        reader.readAsDataURL(file);
+        await reader.readAsDataURL(file);
+
+        uploadData[target].fullyReady = true;
+
+
     }
 
     async function handleFileChange(e: Event, target: number){
@@ -78,12 +108,15 @@
 
         for(let file of files){
             if(target == -2){
-                const index = songs.length;
+                const index = uploadData.length;
                 addSong();
+                uploadData[index].fullyReady = false;
                 updateSongInformation(index, file);
             } else if(target == -1){
                 thumbnailUrl = URL.createObjectURL(file);
-            } else {            
+                URLS.push(thumbnailUrl);
+            } else {          
+                uploadData[target].fullyReady = false;
                 updateSongInformation(target, file);
             }
         }
@@ -100,7 +133,7 @@
             name: "",
             duration: 0,
             extension: "",
-            ordering: songs.length,
+            ordering: uploadData.length,
             bpm: 0,
             parentProject: projectID
         }
@@ -111,24 +144,29 @@
             parentContainer: id
         }
 
-        errors.songErrors.push({
-            name: false,
-            content: false
-        })
+        const uploadDataContainer: UploadDataContainer = {
+            song: temp,
+            songData: temp2,
+            errors: {
+                name: false,
+                content: false,
+            },
+            fullyReady: false,
+        }
 
-        songs.push(temp);
-        songData.push(temp2);
+        uploadData.push(uploadDataContainer);
+
     }
 
-    const getTotalLength = (data: PlayerSongContainer[]) => {
+    const getTotalLength = (data: UploadDataContainer[]) => {
         let result = 0;
         for(let i of data){
-            result += i.duration;
+            result += i.song.duration;
         }
         return result
     }
 
-    let totalLength = $derived(getTotalLength(songs))
+    let totalLength = $derived(getTotalLength(uploadData))
 
     const moveSong = (index: number, moveBack: boolean = true) => {
 
@@ -137,56 +175,43 @@
         }
 
         if(index > 0 && moveBack){
-            let temp = songs[index - 1];
-            songs[index - 1] = songs[index]
-            songs[index] = temp;
-            songs[index - 1].ordering--;
-            songs[index].ordering++;
+            let temp = uploadData[index - 1];
+            uploadData[index - 1] = uploadData[index]
+            uploadData[index] = temp;
 
-            let temp2 = errors.songErrors[index - 1];
-            errors.songErrors[index - 1] = errors.songErrors[index]
-            errors.songErrors[index] = temp2;
+            uploadData[index - 1].song.ordering--;
+            uploadData[index].song.ordering++;
 
-        } else if (index < songs.length - 1 && !moveBack){
-            let temp = songs[index + 1];
-            songs[index + 1] = songs[index]
-            songs[index] = temp;
+        } else if (index < uploadData.length - 1 && !moveBack){
+            let temp = uploadData[index + 1];
+            uploadData[index + 1] = uploadData[index]
+            uploadData[index] = temp;
 
-            songs[index].ordering--;
-            songs[index + 1].ordering++;
-
-            let temp2 = errors.songErrors[index + 1];
-            errors.songErrors[index + 1] = errors.songErrors[index]
-            errors.songErrors[index] = temp2;
-
-
+            uploadData[index].song.ordering--;
+            uploadData[index + 1].song.ordering++;
         }
     }
 
     type Errors = {
         valid: boolean,
         projectName: boolean,
-        projectLength: boolean,
-        songErrors: {
-            name: boolean,
-            content: boolean,
-        }[]
+        projectLength: boolean
+
     };
 
     let errors: Errors = $state({
         valid: true,
         projectName: false,
         projectLength: false,
-        songErrors: []
     })
 
 
     const resetErrors = () => {
         errors.projectLength = false;
         errors.projectName = false;
-        for(let i of errors.songErrors){
-            i.name = false;
-            i.content = false;
+        for(let i of uploadData){
+            i.errors.name = false;
+            i.errors.content = false;
         }
     }
 
@@ -198,10 +223,18 @@
         if(saving){
             return
         }
+
+        for(let i of uploadData){
+            if(!i.fullyReady){
+                addNotification('Processing... please wait', 'warn');
+                return;
+            }
+        }
+
         resetErrors();
 
         if(projectType == "single"){
-            projectName = songs[0].name;
+            projectName = uploadData[0].song.name;
         }
 
         if(projectName == ""){
@@ -209,21 +242,21 @@
             errors.projectName = true;
         }
 
-        if(songs.length == 0){
+        if(uploadData.length == 0){
             errors.valid = false;
             errors.projectLength = true;
         }
 
         let index = 0;
-        for(let i of songs){
-            if(songData[index].content == ""){
+        for(let i of uploadData){
+            if(uploadData[index].songData.content == ""){
                 errors.valid = false;
-                errors.songErrors[index].content = true;
+                i.errors.content = true;
             }
 
-            if(i.name == ""){
+            if(i.song.name == ""){
                 errors.valid = false;
-                errors.songErrors[index].name = true;
+                i.errors.name = true;
             }
             index++;
         }
@@ -241,11 +274,11 @@
                 name: projectName,
                 projectType: projectType,
                 totalLength: totalLength,
-                songs: songs,
+                songs: uploadData.map((a) => {return a.song}),
                 thumbnail: thumbnailUrl
             }
 
-            const response = await getDBDataFromProject(project, songData);
+            const response = await getDBDataFromProject(project, uploadData.map((a) => {return a.songData}));
 
             maxSaveTime = 1 + response.songs.length + response.data.length;
             await saveOrUpdateProject(response.project);
@@ -344,7 +377,7 @@
                     {#if projectType == "multiple"}
                         <input type='text' bind:value={projectName} placeholder="Project" id='nameProject' autocapitalize="off" autocorrect="off" autocomplete='off' class='{errors.projectName ? "error" : "noBorder"} {saveProgress >= 1 ? "saveProgressComplete" : ""}'>
                     {:else}
-                        <input type='text' bind:value={songs[0].name} placeholder="Project" id='nameProject' autocapitalize="off" autocorrect="off" autocomplete='off' class='{errors.projectName ? "error" : "noBorder"} {saveProgress >= 1 ? "saveProgressComplete" : ""}'>
+                        <input type='text' bind:value={uploadData[0].song.name} placeholder="Project" id='nameProject' autocapitalize="off" autocorrect="off" autocomplete='off' class='{errors.projectName ? "error" : "noBorder"} {saveProgress >= 1 ? "saveProgressComplete" : ""}'>
                     {/if}
 
                     <div class="projectLabelText">
@@ -352,7 +385,7 @@
                         {#if projectType == "single"}
                             <p class='text2'>Single</p>
                         {:else}
-                            <p class='text2'>{songs.length} tracks</p>
+                            <p class='text2'>{uploadData.length} tracks</p>
                         {/if}
                     </div>
                 </div>
@@ -374,17 +407,20 @@
                 </div>
             {/if}
 
-            {#each songs as song, i}
+            {#each uploadData as upload, i}
                 <div class="songDataContainer">
-                    <p>{String(i + 1).padStart(String(songs.length).length, '0')}</p>
+                    <p>{String(i + 1).padStart(String(uploadData.length).length, '0')}</p>
                     <div class="songData">
                         <div class="songDataText">
-                            <input class='songName {errors.songErrors[i].name ? "error" : "noBorder"} {saveProgress >= i + 2 ? "saveProgressComplete" : ""}' placeholder="Track {i + 1}" bind:value={song.name} autocapitalize="off" autocorrect="off" autocomplete='off'>
-                            <p class='text2'>{formatSeconds(song.duration, true)}</p>
+                            <input class='songName {upload.errors.name ? "error" : "noBorder"} {saveProgress >= i + 2 ? "saveProgressComplete" : ""}' placeholder="Track {i + 1}" bind:value={upload.song.name} autocapitalize="off" autocorrect="off" autocomplete='off'>
+                            <label class="bpmInput" for='bpmSelector{i}'>
+                                <input bind:value={upload.song.bpm} placeholder="0" id='bpmSelector{i}'>
+                                <p>bpm</p>
+                            </label>
                         </div>
 
 
-                        <label class="uploadHandler {errors.songErrors[i].content ? "error" : "noBorder"} {saveProgress >= i + 2 + songs.length ? "saveProgressComplete" : ""}" style='margin-left: auto;' for='uploadFile{song.id}'
+                        <label class="uploadHandler {upload.errors.content ? "error" : "noBorder"} {saveProgress >= i + 2 + uploadData.length ? "saveProgressComplete" : ""}" style='margin-left: auto;' for='uploadFile{upload.song.id}'
                             ondrop={(e) => {
                                 e.preventDefault();
                                 handleFileChange(e, i);
@@ -402,7 +438,7 @@
                                 e.preventDefault()
                             }}           
                         >
-                            {#if songData[i].content == ""}
+                            {#if uploadData[i].songData.content == ""}
                                 <div class="svgWrapper">
                                     <Upload size=20 />
                                 </div>
@@ -413,13 +449,13 @@
                             {/if}
                         </label>
 
-                        <input type='file' id='uploadFile{song.id}' class='invis'
+                        <input type='file' id='uploadFile{upload.song.id}' class='invis'
                             accept="audio/*"
                             onchange={(event) => handleFileChange(event, i)}
                             ondrop={(e) => handleFileChange(e, i)}
                         >
 
-                        {#if songs.length > 1}
+                        {#if uploadData.length > 1}
 
                             <button class="uploadHandler" onclick={() => moveSong(i)}>
                                 <div class="svgWrapper">
@@ -437,7 +473,7 @@
 
                         {#if projectType == "multiple"}
 
-                            <button class="uploadHandler" onclick={() => {songs.splice(i, 1); songData.splice(i, 1); errors.songErrors.splice(i, 1)}}>
+                            <button class="uploadHandler" onclick={() => {uploadData.splice(i, 1)}}>
                                 <div class="svgWrapper">
                                     <Trash2 size=20/>
                                 </div>
@@ -520,6 +556,27 @@
 
 <style>
 
+    .bpmInput {
+        width: fit-content;
+        display: flex;
+        flex-direction: row;
+        background-color: var(--bg1);
+        height: 40px;
+        align-items: center;
+        padding: 10px;
+        box-sizing: border-box;
+        gap: 5px;
+
+    }
+
+    .bpmInput input {
+        width: 30px;
+        background: var(--bg1);
+        border: none;
+        font-size: 16px;
+        outline: none;
+    }
+
     #multiUpload {
         height: 100px;
         padding: 10px;
@@ -598,11 +655,6 @@
         background-color: var(--bg1);
         border: none;
         padding: 10px;
-    }
-
-    .songDataText .text2 {
-        color: var(--text7);
-        font-size: 14px;
     }
 
     .songData {

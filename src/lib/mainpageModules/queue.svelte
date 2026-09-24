@@ -1,14 +1,29 @@
-<script>
+<script lang='ts'>
     import { appState } from "../../backend/appState.svelte";
     import { getProjectByID } from "../../backend/collectionUtils.svelte";
+    import type { PlayerSongContainer } from "../../backend/sql.svelte";
     import CurrentPlayingThumbnail from "../modules/currentPlayingThumbnail.svelte";
+    import PlaceholderImage from "../modules/placeholderImage.svelte";
+
+    let queueDisplay: PlayerSongContainer[] = $state([]);
+
+    const processData = (queue: PlayerSongContainer[]) => {
+        let output = [];
+        for(let i of queue){
+            output.push(i);
+            if(output.length > appState.settings.queueDisplaySize){
+                return output;
+            }
+        }
+        return output;
+    } 
 
 </script>
 <div id="queue" class='scrollOverflow'>
-    {#each appState.player.queueManager.shuffle ? appState.player.queueManager.shuffleQueue : appState.player.queueManager.currentQueue as s}
+    {#each processData(appState.player.queueManager.shuffle ? appState.player.queueManager.shuffleQueue : appState.player.queueManager.currentQueue) as s}
         <div class="song">
             <div class="thumbnail">
-                <CurrentPlayingThumbnail size='64px' id='{s.parentProject}' />
+                <CurrentPlayingThumbnail size='64px' id={s.parentProject} />
             </div>
             <div class="songDataText">
                 <p class='text1'>{s.name}</p>

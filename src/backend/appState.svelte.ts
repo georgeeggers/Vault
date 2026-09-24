@@ -42,6 +42,7 @@ export const appState: AppState = $state({
     settings: {
         lightMode: false,
         mainHue: 95,
-        coproducer: false
+        coproducer: false,
+        queueDisplaySize: 10,
     }
 })

@@ -29,13 +29,6 @@
     <div class="mainModulesContainer">
 
         <div class="mainModules scrollOverflow">
-
-            <PositionalAudioSelector />
-
-            <div class="audioLinesContainer" style='width: 140px; height: 140px; min-width: 140px; min-height: 140px;'>
-                <AudioLines numOfLines={10} speed={250} bind:playing={loadManager.playing} />
-            </div>
-
             <ProjectView />
             <YourVault />
             <LyricSyncTest />

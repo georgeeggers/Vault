@@ -77,7 +77,7 @@ export const getHowlInstanceV2 = (songData: PlayerSongData, songContainer: Playe
     if(loadManager.positional){
         howl.pos(loadManager.positionX, 0, loadManager.positionY);
     }
-
+    addNotification("GetHowl", "info");
     return howlContainer;
 }
 

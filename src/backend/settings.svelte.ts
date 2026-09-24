@@ -4,6 +4,7 @@ export type Settings = {
     lightMode: boolean,
     mainHue: number,
     coproducer: boolean,
+    queueDisplaySize: number,
 }
 
 export const getTheme = () => {

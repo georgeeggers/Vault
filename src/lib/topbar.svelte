@@ -11,9 +11,19 @@
 
 <div class="topbar" data-tauri-drag-region>
 
-    <button class="locationButton">
+    <button class="locationButton"
+        onclick={() => replace('/settings')}
+    >
         <div class="svgWrapper">
             <Settings2 size={ICON_SIZE} />
+        </div>
+    </button>
+
+    <button class="locationButton"
+        onclick={() => replace('/')}
+    >
+        <div class="svgWrapper">
+            <Home size={ICON_SIZE} />
         </div>
     </button>
 

@@ -1,10 +1,17 @@
 <script lang='ts'>
+    import { onMount } from "svelte";
     import { loadManager } from "../../backend/howlManagers.svelte";
 
     let dragging: boolean = $state(false);
     let draggerX = $state(59);
     let draggerY = $state(59);
     
+    onMount(() => {
+        draggerX = Math.round(loadManager.positionX / loadManager.positionMagnitude * 59) + 59
+        draggerY = Math.round(loadManager.positionY / loadManager.positionMagnitude * 59) + 59
+
+    })
+
     const updateHowlsAndPositions = () => {
         loadManager.positionX = ((draggerX - 59) / 59) * loadManager.positionMagnitude;
         loadManager.positionY = ((draggerY - 59) / 59) * loadManager.positionMagnitude;

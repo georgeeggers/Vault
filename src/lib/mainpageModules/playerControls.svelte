@@ -5,6 +5,7 @@
     import { appState } from "../../backend/appState.svelte";
     import { formatSeconds, seek, stopSeek, toggleMiniplayer, toggleShuffle } from "../../backend/playerUtils.svelte";
     import { loadManager, playNextSongFromQueue, playPause, updateVolume } from "../../backend/howlManagers.svelte";
+    import AudioLines from "../modules/audioLines.svelte";
 
 </script>
 
@@ -13,13 +14,15 @@
     <div class="playerControls">
         <div class="playerButtons">
 
+            <div class="audioLinesContainer" style='width: 32px; height: 32px; min-width: 32px; min-height: 32px;'>
+                <AudioLines numOfLines={5} speed={250} bind:playing={loadManager.playing} />
+            </div>
+
             <button id="shuffle" class='playbarButton' style='margin-left: auto;' onclick={toggleShuffle}>
                 <div class="svgWrapper" style=' {appState.player.queueManager.shuffle ? "color: var(--main5);" : ""}'>
                     <Shuffle size=18 />
                 </div>
             </button>
-
-
 
             <button id="previous" class='playbarButton'>
                 <div class="svgWrapper">

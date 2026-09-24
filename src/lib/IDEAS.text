@@ -14,10 +14,17 @@ Favorites or pinned
  | [ ] Maybe use a bento-style layout for these. Probably gonna have to generate this somehow with javascript
 
 
+!!! 
 
-users should be able to just drag and drop music files onto the app screen. it should recognize if you're dragging multiple or a single music file, and prompt the user what they want to do
+Recently played queue
+Edit projects
+delete projects
+settings
+lyric manager
 
-add progress bars and whatnot for the saving process when creating new projects
+
+!!!
+
 
 
 # extras

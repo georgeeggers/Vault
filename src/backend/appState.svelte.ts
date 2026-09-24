@@ -1,4 +1,5 @@
 import type { Player } from "./playerUtils.svelte"
+import type { Settings } from "./settings.svelte"
 import type { PlayerProject } from "./sql.svelte"
 
 export type AppState = {
@@ -9,6 +10,7 @@ export type AppState = {
     miniPlayer: boolean,
     player: Player,
     projects: PlayerProject[],
+    settings: Settings
 }
 
 export const appState: AppState = $state({
@@ -36,5 +38,10 @@ export const appState: AppState = $state({
             recentlyPlayed: [],
         }
     },
-    projects: []
+    projects: [],
+    settings: {
+        lightMode: false,
+        mainHue: 95,
+        coproducer: false
+    }
 })

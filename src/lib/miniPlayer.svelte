@@ -54,7 +54,7 @@
         bottom: 90px;
         font-size: 16px;
         font-weight: bold;
-        backdrop-filter: blur(5px) brightness(0.5);
+        background-color: var(--bg0);
         padding: 10px;
     }
 
@@ -64,7 +64,7 @@
         padding: 10px;
         box-sizing: border-box;
         position: absolute;
-        background-color: #00000080;
+        background-color: var(--bg0);
         backdrop-filter: blur(5px);
         bottom: 0px;
     }

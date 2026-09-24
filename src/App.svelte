@@ -11,6 +11,7 @@
     import { onDestroy, onMount } from "svelte";
     import { loadManager, stopSong, unloadSongAtStart } from "./backend/howlManagers.svelte";
     import { loadProjects } from "./backend/sql.svelte";
+    import { getTheme } from "./backend/settings.svelte";
 
     onMount(async () => {
       console.log("We just loading here. Switch out for another place when we eventually get onboarding working");
@@ -28,7 +29,7 @@
 
 </script>
 
-<div class="globalArea">
+<div class="globalArea" style='{getTheme()}'>
   {#if !appState.miniPlayer}
     <div class="topbarContainer">
       <Topbar />

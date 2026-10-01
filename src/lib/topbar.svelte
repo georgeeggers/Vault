@@ -1,8 +1,8 @@
 <script>
-    import { Home, Maximize, Minus, Search, Settings2, Upload, X } from "@lucide/svelte";
+    import { BookOpen, Home, Maximize, Minus, Search, Settings2, Upload, X } from "@lucide/svelte";
     import { getCurrentWindow } from "@tauri-apps/api/window";
     import { replace, router } from "svelte-spa-router";
-    import { appState } from "../backend/appState.svelte";
+    import { appState, openPopup } from "../backend/appState.svelte";
     const window = getCurrentWindow();
 
     const ICON_SIZE = 24;
@@ -28,7 +28,7 @@
     </button>
 
 
-    <button class="locationButton" style='margin-left: 40px;' onclick={() => {appState.popupType == 'createNew'; appState.popupShowing = true}}>
+    <button class="locationButton" style='margin-left: 40px;' onclick={() => openPopup("createNew")}>
         <div class="svgWrapper">
             <Upload size={ICON_SIZE} />
         </div>

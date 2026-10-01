@@ -4,7 +4,7 @@
     import { ChevronFirst, ChevronLast, ChevronLeft, ChevronRight, Cylinder, FastForward, Pause, Play, Rewind, Shuffle, SkipBack, SkipForward, TvMinimal, Volume, Volume1, Volume2, VolumeX } from "@lucide/svelte";
     import { appState } from "../../backend/appState.svelte";
     import { formatSeconds, seek, stopSeek, toggleMiniplayer, toggleShuffle } from "../../backend/playerUtils.svelte";
-    import { loadManager, playNextSongFromQueue, playPause, updateVolume } from "../../backend/howlManagers.svelte";
+    import { backTrack, loadManager, playNextSongFromQueue, playPause, updateVolume } from "../../backend/howlManagers.svelte";
     import AudioLines from "../modules/audioLines.svelte";
 
 </script>
@@ -24,7 +24,7 @@
                 </div>
             </button>
 
-            <button id="previous" class='playbarButton'>
+            <button id="previous" class='playbarButton' onclick={backTrack}>
                 <div class="svgWrapper">
                     <Rewind size=20 fill='currentColor' class='playbarButton' strokeWidth={0}/>
                 </div>
@@ -92,7 +92,7 @@
 
             
             <div class="sliderInputContainer">
-                <input id='playerSliderInput' type='range' min="0" max="{appState.player.duration * 100}" bind:value={appState.player.sliderProgress} oninput={(e) => seek(e)} onmousedown={(e) => seek(e)} onmouseup={(e) => stopSeek(e)}>
+                <input id='playerSliderInput' type='range' min="0" max="{appState.player.duration * 100}" bind:value={appState.player.sliderProgress} oninput={seek} onmousedown={seek} onmouseup={stopSeek}>
                 
                 <div class="background">
 

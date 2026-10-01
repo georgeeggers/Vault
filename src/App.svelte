@@ -36,7 +36,7 @@
     </div>
   {/if}
 
-  <div class="contentArea" style="{appState.displayPlaybar ? "height: calc(100% - 160px);" : ""} {appState.miniPlayer ? "height: 100%;" : ""}">
+  <div class="contentArea" style="{loadManager.currentSong ? "height: calc(100% - 160px);" : ""} {appState.miniPlayer ? "height: 100%;" : ""}">
   
     <div class="mainContentContainer">
       <Router {routes} />
@@ -44,7 +44,7 @@
 
   </div>
 
-  {#if appState.displayPlaybar && !appState.miniPlayer}
+  {#if loadManager.currentSong && !appState.miniPlayer}
     <div class="playbarContainer">
       <Playbar />
     </div>

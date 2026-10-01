@@ -2,7 +2,7 @@ import PlayerControls from "../lib/mainpageModules/playerControls.svelte"
 import { appState } from "./appState.svelte"
 import { addNotification, getID } from "./appUtils.svelte"
 import { debug } from "./dev.svelte"
-import { shuffle, startPlaybarTracking, stopPlaybarTracking } from "./playerUtils.svelte"
+import { seek, shuffle, startPlaybarTracking, stopPlaybarTracking, stopSeek } from "./playerUtils.svelte"
 import { loadSongData, type PlayerProject, type PlayerSongContainer, type PlayerSongData } from "./sql.svelte"
 
 export type HowlInstanceV2 = {
@@ -70,6 +70,10 @@ export const getHowlInstanceV2 = (songData: PlayerSongData, songContainer: Playe
         howlContainer.loaded = true;
         howlContainer.howl = howl;
     }).on('end', () => {
+
+        appState.player.progress = 0;
+        appState.player.sliderProgress = 0;
+
         // when the song ends, just select the next song in the queue
         playNextSongFromQueue(appState.player.queueManager.shuffle ? appState.player.queueManager.shuffleQueue : appState.player.queueManager.currentQueue);
     }).load();
@@ -77,13 +81,18 @@ export const getHowlInstanceV2 = (songData: PlayerSongData, songContainer: Playe
     if(loadManager.positional){
         howl.pos(loadManager.positionX, 0, loadManager.positionY);
     }
-    addNotification("GetHowl", "info");
     return howlContainer;
 }
 
 // lots of toomfoolery here to stop memory leaks and random howler instances causing issues
 export const unloadSongAtStart = () => {
     const p = loadManager.preloads.shift();
+
+    if(p?.song){
+        appState.player.queueManager.recentlyPlayed.unshift(p.song);
+    }
+    
+
     if(p){
         if(p.howlInstance){
             p.howlInstance.howl?.unload();
@@ -106,6 +115,8 @@ export const unloadSong = (songContainer : PlayerSongContainer) => {
         }
         index++;
     }
+
+    appState.player.queueManager.recentlyPlayed.unshift(songContainer);
 
     const p = loadManager.preloads.splice(index, 1)[0];
     if(p){
@@ -288,7 +299,12 @@ export const playNextSongFromQueue = async (queue: PlayerSongContainer[]) => {
         }
     } else {
         debug("No more songs in queue!");
-        loadManager.currentSong = null;
+        if(loadManager.currentSong){
+            stopSong(loadManager.currentSong.song);
+        }
+        appState.player.progress = 0;
+        appState.player.sliderProgress = 0;
+        
     }
 }
 
@@ -337,7 +353,29 @@ export const playPause = () => {
             }
         }
     }
+}
 
+export const backTrack = () => {
+    if(loadManager.currentSong){
+        if(appState.player.progress > 5){
+            seek()
+            appState.player.sliderProgress = 0;
+            stopSeek();
+        } else if(appState.player.queueManager.recentlyPlayed.length > 0){
+
+            const target = appState.player.queueManager.recentlyPlayed.splice(0, 1)[0];
+            playSongInstantly(target)
+
+            // lowk a hack but we ball
+            const target2 = appState.player.queueManager.recentlyPlayed.splice(0, 1)[0];
+            if(appState.player.queueManager.shuffle){
+                appState.player.queueManager.shuffleQueue.unshift(target2);
+            } else {
+                appState.player.queueManager.currentQueue.unshift(target2);
+            }
+
+        }
+    }
 }
 
 

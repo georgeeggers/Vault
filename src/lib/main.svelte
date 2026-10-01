@@ -1,6 +1,7 @@
 <script>
-    import { appState } from "../backend/appState.svelte";
+    import { appState, closePopup } from "../backend/appState.svelte";
     import { loadManager } from "../backend/howlManagers.svelte";
+    import EditProject from "./mainpageModules/editProject.svelte";
     import LyricSyncTest from "./mainpageModules/lyricSyncTest.svelte";
     import NewProjectPopup from "./mainpageModules/newProjectPopup.svelte";
     import ProjectView from "./mainpageModules/projectView.svelte";
@@ -15,13 +16,15 @@
 
 <div class="vault">
 
-    {#if appState.popupShowing}
+    {#if appState.popupData.popupShowing}
         <label class="blocker" for='hidePopup'>
-            <button onclick={() => {appState.popupShowing = false}} class='invis' id='hidePopup'>hide poppup</button>
+            <button onclick={closePopup} class='invis' id='hidePopup'>hide poppup</button>
         </label>
         <div class="popup">
-            {#if appState.popupType == "createNew"}
+            {#if appState.popupData.popupType == "createNew"}
                 <NewProjectPopup />
+            {:else if appState.popupData.popupType == "editPrexisting"}
+                <EditProject />
             {/if}
         </div>
     {/if}
@@ -42,10 +45,14 @@
                 <CurrentPlayingThumbnail size='280px' />
             </div>
 
+
             <p>{loadManager.currentSong ? loadManager.currentSong.song.name : ""}</p>
+
+
 
             <div class="queueContainer">
                 <Queue />
+
             </div>
 
 

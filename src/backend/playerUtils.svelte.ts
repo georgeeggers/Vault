@@ -56,12 +56,12 @@ export const stopPlaybarTracking = () => {
     clearInterval(appState.player.intervalID);
 }
 
-export const seek = (e: any) => {
+export const seek = () => {
     stopPlaybarTracking();
     appState.player.progress = appState.player.sliderProgress / 100;
 }
 
-export const stopSeek = (e: any) => {
+export const stopSeek = () => {
     if(loadManager.currentSong){
         if(loadManager.currentSong.howlInstance?.howl){
             loadManager.currentSong.howlInstance.howl.seek(appState.player.sliderProgress / 100);

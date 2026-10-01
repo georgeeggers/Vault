@@ -4,9 +4,10 @@
     type props = {
         numOfLines: number,
         speed: number,
-        playing: boolean
+        playing: boolean,
+        displayType?: string,
     }
-    let { numOfLines = 7, speed = 250, playing = $bindable()}: props = $props();
+    let { numOfLines = 7, speed = 250, playing = $bindable(), displayType = "regular" }: props = $props();
     let lines: number[] = $state([]);
 
 
@@ -44,7 +45,7 @@ onDestroy(() => {
 
 <div class="audioLines">
     {#each lines as l}
-        <div class="line" style='transition: height {speed}ms linear; height: {l}%;'>
+        <div class="line {displayType}" style='transition: height {speed}ms linear; height: {l}%;'>
 
         </div>
     {/each}
@@ -56,6 +57,11 @@ onDestroy(() => {
         display: flex;
         background-color: var(--text1);
         height: 20px;
+    }
+
+    .inverted {
+        background-color: #00000000;
+        backdrop-filter: invert(100%);
     }
 
     .audioLines {

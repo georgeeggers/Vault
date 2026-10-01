@@ -1,6 +1,6 @@
 <script lang="ts">
     import { Ellipsis, Files, Folder, FolderPlus, Plus, Search, Spool } from "@lucide/svelte";
-    import { appState } from "../../backend/appState.svelte";
+    import { appState, openPopup } from "../../backend/appState.svelte";
     import { formatSeconds } from "../../backend/playerUtils.svelte";
     import PlaceholderImage from "../modules/placeholderImage.svelte";
     import { getPlayingID, playSongInstantly } from "../../backend/howlManagers.svelte";
@@ -66,7 +66,7 @@
                 </div>
             <input bind:value={vaultSearchTerm} placeholder="Search..." id='vaultInput' autocapitalize="off" autocomplete="off" autocorrect="off"/>
         </label>
-        <button class='btn main' onclick={() => {appState.popupType = 'createNew'; appState.popupShowing = true}}>
+        <button class='btn main' onclick={() => openPopup("createNew")}>
             <div class="svgWrapper">
                 <Plus size=16 />
             </div>

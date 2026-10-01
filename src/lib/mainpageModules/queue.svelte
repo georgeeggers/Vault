@@ -18,9 +18,12 @@
         return output;
     } 
 
+    let displayRecent = $state(false);
+
 </script>
 <div id="queue" class='scrollOverflow'>
-    {#each processData(appState.player.queueManager.shuffle ? appState.player.queueManager.shuffleQueue : appState.player.queueManager.currentQueue) as s}
+    <button class='btn main' onclick={() => displayRecent = !displayRecent}>Bleh</button>
+    {#each processData(displayRecent ? appState.player.queueManager.recentlyPlayed : (appState.player.queueManager.shuffle ? appState.player.queueManager.shuffleQueue : appState.player.queueManager.currentQueue)) as s}
         <div class="song">
             <div class="thumbnail">
                 <CurrentPlayingThumbnail size='64px' id={s.parentProject} />

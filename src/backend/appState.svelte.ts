@@ -5,19 +5,21 @@ import type { PlayerProject } from "./sql.svelte"
 export type AppState = {
     searchTerm: string,
     displayPlaybar: boolean,
-    popupShowing: boolean,
-    popupType: "createNew",
+
     miniPlayer: boolean,
     player: Player,
     projects: PlayerProject[],
-    settings: Settings
+    settings: Settings,
+    popupData: {
+        popupShowing: boolean,
+        popupType: string,
+        canClosePopup: boolean
+    }
 }
 
 export const appState: AppState = $state({
     searchTerm: "",
     displayPlaybar: true,
-    popupShowing: false,
-    popupType: "createNew",
     miniPlayer: false,
     player: {
         songContainer1: null,
@@ -44,5 +46,29 @@ export const appState: AppState = $state({
         mainHue: 95,
         coproducer: false,
         queueDisplaySize: 10,
+    },
+    popupData: {
+        popupShowing: false,
+        popupType: "createNew",
+        canClosePopup: true,
     }
 })
+
+export const openPopup = (popup: string) => {
+    appState.popupData.popupType = popup;
+    appState.popupData.popupShowing = true;
+}
+
+export const closePopup = () => {
+    if(appState.popupData.canClosePopup){
+        appState.popupData.popupShowing = false;
+    }
+}
+
+export const lockPopup = () => {
+    appState.popupData.canClosePopup = false;
+}
+
+export const unlockPopup = () => {
+    appState.popupData.canClosePopup = true;
+}

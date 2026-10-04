@@ -14,7 +14,7 @@ export type AppState = {
         popupShowing: boolean,
         popupType: string,
         canClosePopup: boolean
-    }
+    },
 }
 
 export const appState: AppState = $state({
@@ -51,7 +51,7 @@ export const appState: AppState = $state({
         popupShowing: false,
         popupType: "createNew",
         canClosePopup: true,
-    }
+    },
 })
 
 export const openPopup = (popup: string) => {

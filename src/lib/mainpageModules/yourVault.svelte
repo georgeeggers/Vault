@@ -6,6 +6,7 @@
     import { getPlayingID, playSongInstantly } from "../../backend/howlManagers.svelte";
     import type { PlayerProject, PlayerSongContainer } from "../../backend/sql.svelte";
     import { debug } from "../../backend/dev.svelte";
+    import { beginEdit, editData } from "./songEditing/editSongs.svelte";
 
     let vaultSearchTerm = $state("");
 
@@ -94,6 +95,8 @@
                         <p class='text2'>{project.songs.length} tracks</p>
                     {/if}
                 </div>
+
+                <button class='btn main' onclick={() => beginEdit(project)}>Edit</button>
             </div>
             {#each project.songs as songContainer, i}
                 <label class="songDataContainer {getPlayingID() == songContainer.id ? "playing" : ""}" for='play{songContainer.id}'>
@@ -126,28 +129,6 @@
         font-size: 16px;
         height: 40px;
         max-height: 40px;
-    }
-
-    .searchTypeToggle {
-        min-width: 40px;
-        min-height: 40px;
-        width: 40px;
-        height: 40px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        background: none;
-        border: none;
-        cursor: pointer;
-    }
-
-    .searchTypeToggle * {
-        color: var(--text7);
-        transition: color .25s;
-    }
-
-    .searchTypeToggle:hover * {
-        color: var(--main5);
     }
 
     .vaultSearchControls {

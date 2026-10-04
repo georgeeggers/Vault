@@ -320,3 +320,20 @@ export const loadProjects = async () => {
     }
 }
 
+export const deleteSongsIfTheyExist = async (songIDs: string[]) => {
+    if(songIDs.length == 0){
+        return;
+    }
+    await loadDb();
+    if(db){
+        let statement = `DELETE FROM songContainer WHERE id IN (`;
+        for(let i = 0; i < songIDs.length; i++){
+            statement += `$${i + 1}`;
+            if(i != songIDs.length - 1){
+                statement += ", ";
+            }
+        }
+        statement += ");";
+        await db.execute(statement, songIDs);
+    }
+}

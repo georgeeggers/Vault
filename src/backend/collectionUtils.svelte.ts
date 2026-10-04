@@ -7,6 +7,5 @@ export const getProjectByID = (projectID: string) => {
             return i;
         }
     }
-    addNotification("Could not find project", "fail");
     return null;
 }

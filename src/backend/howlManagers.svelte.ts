@@ -1,3 +1,4 @@
+import { Howl } from "howler"
 import PlayerControls from "../lib/mainpageModules/playerControls.svelte"
 import { appState } from "./appState.svelte"
 import { addNotification, getID } from "./appUtils.svelte"
@@ -358,7 +359,7 @@ export const playPause = () => {
 export const backTrack = () => {
     if(loadManager.currentSong){
         if(appState.player.progress > 5){
-            seek()
+            seek();
             appState.player.sliderProgress = 0;
             stopSeek();
         } else if(appState.player.queueManager.recentlyPlayed.length > 0){

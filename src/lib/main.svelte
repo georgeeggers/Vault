@@ -1,15 +1,16 @@
 <script>
     import { appState, closePopup } from "../backend/appState.svelte";
     import { loadManager } from "../backend/howlManagers.svelte";
-    import EditProject from "./mainpageModules/editProject.svelte";
+    import EditProject from "./mainpageModules/songEditing/editProject.svelte";
     import LyricSyncTest from "./mainpageModules/lyricSyncTest.svelte";
-    import NewProjectPopup from "./mainpageModules/newProjectPopup.svelte";
+    import NewProjectPopup from "./mainpageModules/songEditing/newProjectPopup.svelte";
     import ProjectView from "./mainpageModules/projectView.svelte";
     import Queue from "./mainpageModules/queue.svelte";
     import YourVault from "./mainpageModules/yourVault.svelte";
     import AudioLines from "./modules/audioLines.svelte";
     import CurrentPlayingThumbnail from "./modules/currentPlayingThumbnail.svelte";
     import PositionalAudioSelector from "./modules/positionalAudioSelector.svelte";
+    import { deleteSongsIfTheyExist } from "../backend/sql.svelte";
 
 
 </script>
@@ -52,7 +53,6 @@
 
             <div class="queueContainer">
                 <Queue />
-
             </div>
 
 
@@ -122,11 +122,12 @@
         display: flex;
         background-color: #00000080;
         backdrop-filter: blur(20px);
+        z-index: 1;
     }
 
     .popup {
         
-        z-index: 1;
+        z-index: 2;
         left: 50%;
         top: 50%;
         transform: translate(-50%, -50%);

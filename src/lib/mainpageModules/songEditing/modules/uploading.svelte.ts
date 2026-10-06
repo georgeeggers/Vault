@@ -2,7 +2,7 @@ import type { PlayerSongContainer, PlayerSongData } from "../../../../backend/sq
 
 export type UploadDataContainer = {
     song: PlayerSongContainer,
-    songData: PlayerSongData | "editing",
+    songData: PlayerSongData,
     errors: {
         name: boolean,
         content: boolean,

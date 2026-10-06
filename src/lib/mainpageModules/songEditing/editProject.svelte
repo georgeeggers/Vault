@@ -1,9 +1,10 @@
 <script lang='ts'>
-    import { getID } from "../../../backend/appUtils.svelte";
+    import { addNotification, getID } from "../../../backend/appUtils.svelte";
     import type { UploadProject } from "./modules/uploading.svelte";
     import SongEditor from "./modules/songEditor.svelte";
     import { onMount } from "svelte";
     import { editData } from "./editSongs.svelte";
+    import { getSongDataWithoutLoading } from "../../../backend/sql.svelte";
 
     let loaded = $state(false);
 
@@ -24,26 +25,33 @@
     onMount(async () => {
         if(editData.editProject){
 
-            for(let i of editData.editProject.songs){
-                project.songData.push({
-                    song: {
-                        id: i.id,
-                        name: i.name,
-                        duration: i.duration,
-                        extension: i.extension,
-                        ordering: i.ordering,
-                        bpm: i.bpm,
-                        parentProject: i.parentProject
-                    },
-                    songData: "editing",
-                    errors: {
-                        name: false,
-                        content: false,
-                    },
-                    uploadInitiated: false,
-                    fullyReady: true,
-                })
+            const results = await getSongDataWithoutLoading(editData.editProject.songs);
+            if(results){
+                let index = 0;
+                for(let i of editData.editProject.songs){
+                    project.songData.push({
+                        song: {
+                            id: i.id,
+                            name: i.name,
+                            duration: i.duration,
+                            extension: i.extension,
+                            ordering: i.ordering,
+                            bpm: i.bpm,
+                            parentProject: i.parentProject
+                        },
+                        songData: results[index],
+                        errors: {
+                            name: false,
+                            content: false,
+                        },
+                        uploadInitiated: false,
+                        fullyReady: true,
+                    })
+                }
+            } else {
+                addNotification("Song Data Not Found", "fail");
             }
+
 
 
             if(editData.editProject.thumbnail){

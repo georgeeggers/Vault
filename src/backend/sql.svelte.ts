@@ -146,6 +146,9 @@ ON CONFLICT(id) DO UPDATE SET
 }
 
 export const saveOrUpdateSongData = async (s: DBSongData) => {
+    if(s.content == "editing"){
+        return;
+    }
     await loadDb();
     if(db){
         const result = await db.execute(
@@ -343,5 +346,29 @@ export const deleteSongsIfTheyExist = async (songIDs: string[]) => {
         await db.execute("DELETE FROM songContainer WHERE id IN " + statement, songIDs);
         await db.execute("DELETE FROM songData WHERE parentContainer IN " + statement, songIDs);
 
+    }
+}
+
+export const getSongDataWithoutLoading = async (songs: PlayerSongContainer[]) => {
+    if(songs.length == 0){
+        return;
+    }
+    await loadDb();
+    if(db){
+        let statement = `(`;
+        for(let i = 0; i < songs.length; i++){
+            statement += `$${i + 1}`;
+            if(i != songs.length - 1){
+                statement += ", ";
+            }
+        }
+        statement += ");";
+        const results: {
+            id: string,
+            parentContainer: string,
+            lyrics: string,
+            content: string
+        }[] = await db.select("SELECT id, parentContainer, lyrics FROM songData WHERE parentContainer IN " + statement, songs.map((a) => {return a.id}));
+        return results.map((a) => {a['content'] = "editing"; return a});
     }
 }

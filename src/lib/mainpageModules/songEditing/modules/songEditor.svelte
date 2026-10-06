@@ -34,19 +34,9 @@
 
 
     const updateSongInformation = async (target: number, file: any) => {
-        if(projectData.songData[target].songData == "editing"){
-            const temp: PlayerSongData = {
-                id: getID("D_"),
-                content: "",
-                parentContainer: projectData.songData[target].song.id,
-            }
-            projectData.songData[target].songData = temp;
-        }
-
         projectData.songData[target].songData.content = URL.createObjectURL(file);
         URLS.push(projectData.songData[target].songData.content)
 
-        console.log(projectData.songData[target].songData)
 
         projectData.songData[target].uploadInitiated = true;
         projectData.songData[target].song.extension = file.type.split("/")[1];
@@ -227,11 +217,9 @@
         console.log(projectData.songData);
 
         for(let i of projectData.songData){
-            if(i.songData != "editing"){
-                if(i.songData.content == ""){
-                    projectData.errors.valid = false;
-                    i.errors.content = true;
-                }
+            if(i.songData.content == ""){
+                projectData.errors.valid = false;
+                i.errors.content = true;
             }
 
             if(i.song.name == ""){
@@ -262,9 +250,7 @@
 
             const temp = [];
             for(let i of projectData.songData){
-                if(i.songData != "editing"){
-                    temp.push(i.songData);
-                }
+                temp.push(i.songData);
             }
 
             const response = await getDBDataFromProject(project, temp);
@@ -417,21 +403,16 @@
                         e.preventDefault()
                     }}           
                 >
-                    {#if projectData.songData[i].songData != "editing"}
-                        {#if projectData.songData[i].songData.content == ""}
-                            <div class="svgWrapper">
-                                <Upload size=20 />
-                            </div>
-                        {:else}
-                            <div class="svgWrapper" style='color: var(--main5);'>
-                                <Music size=20 />
-                            </div>
-                        {/if}
+                    {#if projectData.songData[i].songData.content == ""}
+                        <div class="svgWrapper">
+                            <Upload size=20 />
+                        </div>
                     {:else}
                         <div class="svgWrapper" style='color: var(--main5);'>
                             <Music size=20 />
                         </div>
                     {/if}
+
                 </label>
 
                 <input type='file' id='uploadFile{upload.song.id}' class='invis'

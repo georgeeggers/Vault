@@ -34,10 +34,20 @@
 
 
     const updateSongInformation = async (target: number, file: any) => {
-        if(projectData.songData[target].songData != "editing"){
-            projectData.songData[target].songData.content = URL.createObjectURL(file);
-            URLS.push(projectData.songData[target].songData.content)
+        if(projectData.songData[target].songData == "editing"){
+            const temp: PlayerSongData = {
+                id: getID("D_"),
+                content: "",
+                parentContainer: projectData.songData[target].song.id,
+            }
+            projectData.songData[target].songData = temp;
         }
+
+        projectData.songData[target].songData.content = URL.createObjectURL(file);
+        URLS.push(projectData.songData[target].songData.content)
+
+        console.log(projectData.songData[target].songData)
+
         projectData.songData[target].uploadInitiated = true;
         projectData.songData[target].song.extension = file.type.split("/")[1];
         if(projectData.songData[target].song.name == ""){

@@ -1,6 +1,7 @@
 import Database from "@tauri-apps/plugin-sql";
 import { appState } from "./appState.svelte";
 import { debug } from "./dev.svelte";
+import { addNotification } from "./appUtils.svelte";
 
 export type DBProject = {
     id: string,
@@ -223,13 +224,18 @@ export const loadSongData = async (container: PlayerSongContainer) => {
     loadDb();
     if(db){
         const result = await db.select<DBSongData[]>("SELECT * from songData WHERE parentContainer = $1", [container.id]);
+        console.log(result);
         if(!result){
             debug("[ERROR] Song data not found :(");
             return null;
         }
 
         if(result.length > 1){
-            debug("[ERROR] Conflicting song data found :(. Continuing with first element");
+            addNotification("[ERROR] Conflicting song data found :(. Continuing with first element", 'fail');
+            const temp = result.splice(1);
+            for(let i of temp){
+                await db.execute("DELETE FROM songData WHERE ID = $1", [i.id]);
+            }
         }
 
         const songData = getPlayerSongDataFromDBSongData(result[0]);
@@ -326,7 +332,7 @@ export const deleteSongsIfTheyExist = async (songIDs: string[]) => {
     }
     await loadDb();
     if(db){
-        let statement = `DELETE FROM songContainer WHERE id IN (`;
+        let statement = `(`;
         for(let i = 0; i < songIDs.length; i++){
             statement += `$${i + 1}`;
             if(i != songIDs.length - 1){
@@ -334,6 +340,8 @@ export const deleteSongsIfTheyExist = async (songIDs: string[]) => {
             }
         }
         statement += ");";
-        await db.execute(statement, songIDs);
+        await db.execute("DELETE FROM songContainer WHERE id IN " + statement, songIDs);
+        await db.execute("DELETE FROM songData WHERE parentContainer IN " + statement, songIDs);
+
     }
 }

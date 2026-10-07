@@ -107,7 +107,7 @@
         padding: 10px;
         box-sizing: border-box;
         display: grid;
-        grid-template-columns: repeat(4, 1fr);
+        grid-template-columns: repeat(8, 1fr);
     }
 
     .song {
@@ -133,6 +133,7 @@
         height: auto;
         aspect-ratio: 1/1;
         position: relative;
+        box-sizing: border-box;
     }
 
     .imgContainer img {
@@ -164,6 +165,32 @@
 
     }
 
+    
+    @media (max-width: 1800px){
+        .containers {
+            grid-template-columns: repeat(7, 1fr);
+        }
+    }
+
+    @media (max-width: 1600px){
+        .containers {
+            grid-template-columns: repeat(6, 1fr);
+        }
+    }
+
+    @media (max-width: 1400px){
+        .containers {
+            grid-template-columns: repeat(5, 1fr);
+        }
+    }
+
+    
+    @media (max-width: 1200px){
+        .containers {
+            grid-template-columns: repeat(4, 1fr);
+        }
+    }
+
     @media (max-width: 1000px){
         .containers {
             grid-template-columns: repeat(3, 1fr);
@@ -188,7 +215,6 @@
         top: 0px;
         width: 100%;
         height: 100%;
-        background-color: #00000080;
         transition: opacity .25s;
     }
 
@@ -198,12 +224,12 @@
         top: 0px;
         width: 100%;
         height: 100%;
-        background-color: #00000080;
         transition: opacity .25s;
         opacity: 0.0;
         align-items: center;
         justify-content: center;
         display: flex;
+        box-sizing: border-box;
     }
 
     .song:hover .playingBlocker {

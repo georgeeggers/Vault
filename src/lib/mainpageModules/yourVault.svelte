@@ -1,12 +1,14 @@
 <script lang="ts">
-    import { Ellipsis, Files, Folder, FolderPlus, Plus, Search, Spool } from "@lucide/svelte";
+    import { Ellipsis, Files, Folder, FolderPlus, Pause, Play, Plus, Search, Spool } from "@lucide/svelte";
     import { appState, openPopup } from "../../backend/appState.svelte";
     import { formatSeconds } from "../../backend/playerUtils.svelte";
     import PlaceholderImage from "../modules/placeholderImage.svelte";
-    import { getPlayingID, playSongInstantly } from "../../backend/howlManagers.svelte";
+    import { getPlayingID, loadManager, loadQueueFromProjectV2, playPause, playSongInstantly } from "../../backend/howlManagers.svelte";
     import type { PlayerProject, PlayerSongContainer } from "../../backend/sql.svelte";
     import { debug } from "../../backend/dev.svelte";
     import { beginEdit, editData } from "./songEditing/editSongs.svelte";
+    import { getProjectByID } from "../../backend/collectionUtils.svelte";
+    import AudioLines from "../modules/audioLines.svelte";
 
     let vaultSearchTerm = $state("");
 
@@ -57,6 +59,20 @@
         })
     }
 
+    let playingProject = $derived(loadManager.currentSong ? getProjectByID(loadManager.currentSong.song.parentProject) : null);
+
+    const processClick = (p: PlayerProject) => {
+        if(playingProject){
+            if(p.id != playingProject.id){
+                loadQueueFromProjectV2(p);
+            } else {
+                playPause();
+            }
+        } else {
+            loadQueueFromProjectV2(p);
+        }
+    }
+
 </script>
 
 <div class="yourVault">
@@ -96,7 +112,31 @@
                     {/if}
                 </div>
 
-                <button class='btn main' onclick={() => beginEdit(project)}>Edit</button>
+                <button class="playButton" onclick={() => processClick(project)}>
+                    <div class="hoverPlayPauseButton">
+                        {#if playingProject}
+                            {#if project.id == playingProject.id && loadManager.playing}
+                                <div class="svgWrapper">
+                                    <Pause size=37 fill='currentColor' strokeWidth={0}/>
+                                </div>
+                            {:else}
+                                <div class="svgWrapper">
+                                    <Play size=37 fill='currentColor' strokeWidth={0}/>
+                                </div>        
+                            {/if}
+                        {:else}
+                            <div class="svgWrapper">
+                                <Play size=37 fill='currentColor' strokeWidth={0}/>
+                            </div>
+                        {/if}
+                    </div>
+                </button>
+
+                <button class='songDataButton' onclick={() => beginEdit(project)}>
+                    <div class="svgWrapper">
+                        <Ellipsis size=20 />
+                    </div>
+                </button>
             </div>
             {#each project.songs as songContainer, i}
                 <label class="songDataContainer {getPlayingID() == songContainer.id ? "playing" : ""}" for='play{songContainer.id}'>
@@ -106,12 +146,6 @@
                             <p class='text1'>{songContainer.name}</p>
                             <p class='text2'>{formatSeconds(songContainer.duration, true)}</p>
                         </div>
-
-                        <button class='songDataButton'>
-                            <div class="svgWrapper">
-                                <Ellipsis size=20 />
-                            </div>
-                        </button>
                     </div>
                 </label>
                 <button class='invis' id='play{songContainer.id}' onclick={() => playSongInstantly(songContainer)}>play{songContainer.id}</button>
@@ -122,6 +156,30 @@
 </div>
 
 <style>
+
+
+
+    .playButton {
+        width: 60px;
+        height: 60px;
+        min-width: 60px;
+        min-height: 60px;
+        background-color: var(--bg1);
+        align-items: center;
+        justify-content: center;
+        display: flex;
+        border: none;
+        cursor: pointer;
+        transition: scale .1s;
+    }
+
+    .playButton:hover {
+        scale: 1.05;
+    }
+
+    .playButton * {
+        color: var(--main5);
+    }
 
     .btn.main {
         align-items: center;
@@ -194,6 +252,7 @@
         align-items: center;
         padding: 0px 10px 0px 10px;
         transition: background-color .25s;
+        box-sizing: border-box;
     }
 
     .songDataButton {
@@ -201,6 +260,8 @@
         border: none;
         margin-left: auto;
         cursor: pointer;
+        margin-left: 10px;
+        margin-right: 10px;
     }
 
     .songDataContainer {

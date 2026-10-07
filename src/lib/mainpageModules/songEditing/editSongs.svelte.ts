@@ -11,7 +11,6 @@ export let editData: EditData = {
 }
 
 export const beginEdit = (p: PlayerProject) => {
-    console.log(p);
     editData.editProject = $state.snapshot(p);
     openPopup("editPrexisting");
 }

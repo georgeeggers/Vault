@@ -1,6 +1,7 @@
 <script>
     import { appState } from "../../backend/appState.svelte";
     import { loadManager } from "../../backend/howlManagers.svelte";
+    import { deleteAllLocal } from "../../backend/sql.svelte";
     import PositionalAudioSelector from "../modules/positionalAudioSelector.svelte";
     import Toggle from "../modules/toggle.svelte";
 
@@ -90,6 +91,18 @@
 
             {/if}
 
+        </div>
+
+        <p>Debug</p>
+
+        <div class="settingGroup">
+            <div class="settingRow">
+                <div class="text">
+                    <p class='title'>Delete everything</p>
+                    <p class='description'>Delete everything in the database. Undoable</p>
+                </div>
+                <button class='btn fail' onclick={deleteAllLocal}>Delete</button>
+            </div>
         </div>
     </div>
 

@@ -48,7 +48,7 @@ export let loadManager: LoadManager = $state({
 
 export const getHowlInstanceV2 = (songData: PlayerSongData, songContainer: PlayerSongContainer) => {
     // if there is no song data, return
-    if(!songData){
+    if(!songData.content){
         return null
     }
 
@@ -59,6 +59,7 @@ export const getHowlInstanceV2 = (songData: PlayerSongData, songContainer: Playe
         loaded: false,
         id: "howl_" + getID()
     });
+
 
     // being howl instantiation
     const howl = new Howl({

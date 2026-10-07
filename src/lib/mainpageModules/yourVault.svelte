@@ -56,7 +56,7 @@
                 }
             }
             return false;
-        })
+        }).toReversed();
     }
 
     let playingProject = $derived(loadManager.currentSong ? getProjectByID(loadManager.currentSong.song.parentProject) : null);
@@ -284,16 +284,12 @@
 
 
 
-    .songDataContainer:hover > p, .songDataContainer:hover .songDataButton * {
+    .songDataContainer:hover > p {
         color: var(--text1);
     }
 
     .songDataButton:hover * {
         color: var(--main5) !important;
-    }
-
-    .playing .songDataButton:hover * {
-        color: var(--main6) !important;
     }
 
     .songDataContainer:hover .songData {
@@ -304,9 +300,6 @@
         color: var(--main5) !important;
     }
 
-    .playing .songDataButton * {
-        color: var(--text1) !important;
-    }
 
     .playing .songData {
         background-color: var(--main3) !important;

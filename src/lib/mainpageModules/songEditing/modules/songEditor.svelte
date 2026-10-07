@@ -4,7 +4,7 @@
     import { onDestroy, onMount } from "svelte";
     import type { Errors, UploadDataContainer, UploadProject } from "./uploading.svelte";
     import { addNotification, getID } from "../../../../backend/appUtils.svelte";
-    import { deleteSongsIfTheyExist, getDBDataFromProject, loadProjects, saveOrUpdateProject, saveOrUpdateSong, saveOrUpdateSongData, type PlayerProject, type PlayerSongContainer, type PlayerSongData } from "../../../../backend/sql.svelte";
+    import { b64ToString, dataUrlToB64, deleteSongsIfTheyExist, getDBDataFromProject, loadProjects, saveOrUpdateProject, saveOrUpdateSong, saveOrUpdateSongData, type PlayerProject, type PlayerSongContainer, type PlayerSongData } from "../../../../backend/sql.svelte";
     import { calcTempo } from "../../../../backend/bpmGuessing";
     import { appState, closePopup, lockPopup, unlockPopup } from "../../../../backend/appState.svelte";
     import PlaceholderImage from "../../../modules/placeholderImage.svelte";
@@ -25,7 +25,6 @@
         // attempt to clean up as many object urls as we can to help prevent memory leaks :)
         for(let i of URLS){
             URL.revokeObjectURL(i);
-            console.log(i);
             projectData.songData.length = 0;
         }
     });
@@ -72,7 +71,6 @@
         if(projectData.saving){
             return
         }
-        console.log(e);
         let files;
         if(e.type == "change"){
             // @ts-ignore
@@ -189,11 +187,18 @@
             return
         }
 
+        projectData.errors.valid = true;
+        projectData.errors.projectLength = false;
+        projectData.errors.projectName = false;
+
         for(let i of projectData.songData){
             if(!i.fullyReady && i.uploadInitiated){
                 addNotification('Processing Audio... please wait', 'warn');
                 return;
             }
+
+            i.errors.content = false;
+            i.errors.name = false;
         }
 
         resetErrors();
@@ -214,7 +219,6 @@
 
         let index = 0;
 
-        console.log(projectData.songData);
 
         for(let i of projectData.songData){
             if(i.songData.content == ""){
@@ -254,14 +258,12 @@
             }
 
             const response = await getDBDataFromProject(project, temp);
-
             maxSaveTime = 1 + response.songs.length + response.data.length;
             await saveOrUpdateProject(response.project);
             saveProgress++;
             for(let i of response.songs){
                 await saveOrUpdateSong(i);
                 saveProgress++;
-
             }
 
             for(let i of response.data){

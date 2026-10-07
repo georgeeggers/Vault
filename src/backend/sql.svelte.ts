@@ -66,6 +66,21 @@ export const uInt8ArrayToUrl = (input: Uint8Array<ArrayBuffer>) => {
     return URL.createObjectURL(new Blob([input]));
 }
 
+export const b64ToString = (input: string) => {
+    // @ts-ignore
+    let parts = input.split(' ');
+    const bytes = atob(parts[parts.length - 1]);
+    const byteArray1 = [];
+    for (let i = 0; i < bytes.length; i++) {
+        const byte = bytes.charCodeAt(i);
+        byteArray1.push(byte);
+    }
+    const byteArray = new Uint8Array(byteArray1);
+    const decoder = new TextDecoder('utf-8');
+    const str = decoder.decode(byteArray);
+    return str;
+}
+
 const b64ToFileURL = (input: string) => {
     // @ts-ignore
     let parts = input.split(' ');
@@ -149,6 +164,7 @@ export const saveOrUpdateSongData = async (s: DBSongData) => {
     if(s.content == "editing"){
         return;
     }
+
     await loadDb();
     if(db){
         const result = await db.execute(
@@ -227,11 +243,11 @@ export const loadSongData = async (container: PlayerSongContainer) => {
     loadDb();
     if(db){
         const result = await db.select<DBSongData[]>("SELECT * from songData WHERE parentContainer = $1", [container.id]);
-        console.log(result);
         if(!result){
-            debug("[ERROR] Song data not found :(");
+            addNotification("[ERROR] Song data not found :(", 'fail');
             return null;
         }
+
 
         if(result.length > 1){
             addNotification("[ERROR] Conflicting song data found :(. Continuing with first element", 'fail');
@@ -240,7 +256,6 @@ export const loadSongData = async (container: PlayerSongContainer) => {
                 await db.execute("DELETE FROM songData WHERE ID = $1", [i.id]);
             }
         }
-
         const songData = getPlayerSongDataFromDBSongData(result[0]);
         return songData;
     }
@@ -250,7 +265,10 @@ export const loadSongData = async (container: PlayerSongContainer) => {
 }
 
 export const getDBDataFromSongData = async (p: PlayerSongData) => {
-    const data = await dataUrlToB64(p.content);
+    let data = "editing";
+    if(p.content != "editing"){
+        data = await dataUrlToB64(p.content)
+    }
     let lyrics = "";
     if(p.lyrics){
         lyrics = JSON.stringify(p.lyrics);
@@ -280,6 +298,8 @@ export const getDBDataFromSong = async (p: PlayerSongContainer) => {
 }
 
 export const getDBDataFromProject = async (p: PlayerProject, songData: PlayerSongData[]) => {
+
+
     const thumbnail = p.thumbnail ? await dataUrlToB64(p.thumbnail) : "";
     let project: DBProject = {
         id: p.id,
@@ -349,12 +369,13 @@ export const deleteSongsIfTheyExist = async (songIDs: string[]) => {
     }
 }
 
-export const getSongDataWithoutLoading = async (songs: PlayerSongContainer[]) => {
+export const getMultipleSongDataWithoutLoading = async (songs: PlayerSongContainer[]) => {
     if(songs.length == 0){
-        return;
+        return [];
     }
     await loadDb();
     if(db){
+
         let statement = `(`;
         for(let i = 0; i < songs.length; i++){
             statement += `$${i + 1}`;
@@ -363,12 +384,23 @@ export const getSongDataWithoutLoading = async (songs: PlayerSongContainer[]) =>
             }
         }
         statement += ");";
-        const results: {
+
+        const result: {
             id: string,
             parentContainer: string,
             lyrics: string,
             content: string
         }[] = await db.select("SELECT id, parentContainer, lyrics FROM songData WHERE parentContainer IN " + statement, songs.map((a) => {return a.id}));
-        return results.map((a) => {a['content'] = "editing"; return a});
+
+        let output = [];
+        for(let song of songs){
+            for(let i of result){
+                if(song.id == i.parentContainer){
+                    i.content = "editing";
+                    output.push(i);
+                }
+            }
+        }
+        return output;
     }
 }

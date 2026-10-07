@@ -4,7 +4,7 @@
     import SongEditor from "./modules/songEditor.svelte";
     import { onMount } from "svelte";
     import { editData } from "./editSongs.svelte";
-    import { getSongDataWithoutLoading } from "../../../backend/sql.svelte";
+    import { getMultipleSongDataWithoutLoading } from "../../../backend/sql.svelte";
 
     let loaded = $state(false);
 
@@ -24,33 +24,34 @@
 
     onMount(async () => {
         if(editData.editProject){
-
-            const results = await getSongDataWithoutLoading(editData.editProject.songs);
-            if(results){
+                const result = await getMultipleSongDataWithoutLoading(editData.editProject.songs);
                 let index = 0;
-                for(let i of editData.editProject.songs){
-                    project.songData.push({
-                        song: {
-                            id: i.id,
-                            name: i.name,
-                            duration: i.duration,
-                            extension: i.extension,
-                            ordering: i.ordering,
-                            bpm: i.bpm,
-                            parentProject: i.parentProject
-                        },
-                        songData: results[index],
-                        errors: {
-                            name: false,
-                            content: false,
-                        },
-                        uploadInitiated: false,
-                        fullyReady: true,
-                    })
+                if(result){
+                    for(let i of editData.editProject.songs){
+                        project.songData.push({
+                            song: {
+                                id: i.id,
+                                name: i.name,
+                                duration: i.duration,
+                                extension: i.extension,
+                                ordering: i.ordering,
+                                bpm: i.bpm,
+                                parentProject: i.parentProject
+                            },
+                            songData: result[index],
+                            errors: {
+                                name: false,
+                                content: false,
+                            },
+                            uploadInitiated: false,
+                            fullyReady: true,
+                        })
+                        index++;
+                    }
+                } else {
+                    addNotification("Error! No SongData Found", 'fail');
                 }
-            } else {
-                addNotification("Song Data Not Found", "fail");
-            }
+
 
 
 

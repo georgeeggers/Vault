@@ -21,8 +21,9 @@
   },
   "dependencies": {
     "@lucide/svelte": "^1.41.0",
-    "@tauri-apps/cli": "^2.11.4",
-    "@tauri-apps/plugin-sql": "^2.4.1",
+    "@tauri-apps/api": "^2.12.4",
+    "@tauri-apps/cli": "^2.12.3",
+    "@tauri-apps/plugin-sql": "^2.6.0",
     "@tauri-apps/plugin-store": "^2.5.0",
     "howler": "^2.2.4",
     "music-tempo": "^1.0.3",

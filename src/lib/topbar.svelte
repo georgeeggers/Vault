@@ -1,11 +1,24 @@
-<script>
-    import { BookOpen, Home, Maximize, Minus, Search, Settings2, Upload, X } from "@lucide/svelte";
+<script lang='ts'>
+    import { Home, Maximize, Minus, Search, Settings2, Upload, X } from "@lucide/svelte";
     import { getCurrentWindow } from "@tauri-apps/api/window";
-    import { replace, router } from "svelte-spa-router";
+    import { replace} from "svelte-spa-router";
     import { appState, openPopup } from "../backend/appState.svelte";
+    import { searchForProjects } from "../backend/appUtils.svelte";
+    import { fade, fly } from "svelte/transition";
+    import { loadManager } from "../backend/howlManagers.svelte";
+    import ContentDisplay from "./modules/contentDisplay.svelte";
+    import App from "../App.svelte";
     const window = getCurrentWindow();
 
     const ICON_SIZE = 24;
+
+
+    let searchResults = $derived(searchForProjects(appState.projects, appState.searchTerm))
+    $effect(() => {
+        if(!appState.popupData.popupShowing){
+            appState.showSearchResults = appState.searchTerm != "";
+        }
+    })
 
 </script>
 
@@ -38,8 +51,32 @@
         <div class="svgWrapper">
             <Search size={ICON_SIZE} />
         </div>
-        <input bind:value={appState.searchTerm} id='searchBar' placeholder="Search for anything...">
+        <input bind:value={appState.searchTerm} id='searchBar' autocapitalize='off' autocomplete="off" autocorrect="off" placeholder="Search for anything...">
     </label>
+
+    {#if appState.showSearchResults}
+
+        <label class="searchBlocker"
+            style="{loadManager.currentSong && !appState.miniPlayer ? "height: calc(100% - 140px);" : "height: calc(100% - 60px);"}"
+
+        >
+            <button class='invis' onclick={() => {
+                appState.showSearchResults = false;
+            }}>close</button>
+        </label>
+
+        <div class="searchResults scrollOverflow"
+            style="height: min({(searchResults.projects.length + searchResults.songs.length) * 70 + 12}px, 80vh);"
+        >
+            {#each searchResults.projects as project}
+                <ContentDisplay data={project} displayType="project" />
+            {/each}
+
+            {#each searchResults.songs as song, i}
+                <ContentDisplay data={song} displayType="song" />
+            {/each}
+        </div>
+    {/if}
 
     <button class='windowControlButton' onclick={window.minimize} style='margin-left: auto;'>
         <div class="svgWrapper">
@@ -60,11 +97,36 @@
     </button>
 
 </div>
-
 <style>
 
+    .searchBlocker {
+        position: absolute;
+        left: 0px;
+        top: 0px;
+        width: 100%;
+        height: calc(100% - 140px);
+        top: 60px;
+        display: flex;
+        background-color: #00000080;
+        backdrop-filter: blur(20px);
+        z-index: 0;
+    }
 
+    .searchResults {
+        position: fixed;
+        top: 70px;
+        width: min(600px, 100vw);
+        background-color: var(--bg0);
+        border: 1px solid var(--bg2);
+        padding: 10px;
+        box-sizing: border-box;
+        left: 50%;
+        transform: translateX(-50%);
+        gap: 10px;
+        display: flex;
+        flex-direction: column;
 
+    }
 
 
     .topbar {

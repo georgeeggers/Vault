@@ -240,6 +240,7 @@ export const getPlayerProjectFromDBProject = (d: DBProject, songContainers: DBSo
 }
 
 export const loadSongData = async (container: PlayerSongContainer) => {
+    debug("loadSongData");
     loadDb();
     if(db){
         const result = await db.select<DBSongData[]>("SELECT * from songData WHERE parentContainer = $1", [container.id]);
@@ -327,6 +328,7 @@ export const getDBDataFromProject = async (p: PlayerProject, songData: PlayerSon
 
 export const loadProjects = async () => {
     await loadDb();
+    debug("loadProjects");
     if(db){
         appState.projects.length = 0;
         appState.projects.push({
@@ -346,6 +348,8 @@ export const loadProjects = async () => {
                 appState.projects[0].songs.push(i);
             }
         }
+
+        addNotification('loaded!', 'info');
     }
 }
 
@@ -365,7 +369,13 @@ export const deleteSongsIfTheyExist = async (songIDs: string[]) => {
         statement += ");";
         await db.execute("DELETE FROM songContainer WHERE id IN " + statement, songIDs);
         await db.execute("DELETE FROM songData WHERE parentContainer IN " + statement, songIDs);
+    }
+}
 
+export const deleteProject = async (projectID: string) => {
+    await loadDb();
+    if(db){
+        await db.execute("DELETE FROM projects WHERE id = $1", [projectID]);
     }
 }
 
@@ -402,5 +412,13 @@ export const getMultipleSongDataWithoutLoading = async (songs: PlayerSongContain
             }
         }
         return output;
+    }
+}
+
+export const getTotalNumberOfSongData = async () => {
+    await loadDb();
+    if(db){
+        const response: [{"COUNT(*)": number}] = await db.select("SELECT COUNT(*) FROM songData");
+        return response[0]["COUNT(*)"];
     }
 }

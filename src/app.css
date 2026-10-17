@@ -371,3 +371,45 @@ p {
     -ms-user-select: none;
     user-select: none;
 }
+
+
+
+.topbarContainer {
+width: 100%;
+min-height: 60px;
+height: 60px;
+z-index: 2;
+}
+
+
+
+@keyframes deleting {
+    from {
+        rotate: 0deg;
+        color: var(--text1);
+    }
+
+    to {
+        rotate: 360000deg;
+        color: red;
+    }
+}
+
+.songDataButton {
+    background: none;
+    border: none;
+    margin-left: auto;
+    cursor: pointer;
+    margin-left: 10px;
+    margin-right: 10px;
+}
+
+.songDataContainer > p, .songDataButton * {
+    color: var(--text7);
+    font-size: 16px;
+    transition: color .25s;
+}
+
+.songDataButton:hover * {
+    color: var(--text1) !important;
+}

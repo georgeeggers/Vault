@@ -1,4 +1,4 @@
-import { openPopup, unlockPopup } from "../../../backend/appState.svelte"
+import { appState, openPopup, unlockPopup } from "../../../backend/appState.svelte"
 import type { PlayerProject } from "../../../backend/sql.svelte"
 import EditProject from "./editProject.svelte"
 

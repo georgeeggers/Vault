@@ -10,6 +10,7 @@ export type AppState = {
     player: Player,
     projects: PlayerProject[],
     settings: Settings,
+    showSearchResults: boolean,
     popupData: {
         popupShowing: boolean,
         popupType: string,
@@ -21,6 +22,7 @@ export const appState: AppState = $state({
     searchTerm: "",
     displayPlaybar: true,
     miniPlayer: false,
+    showSearchResults: false,
     player: {
         songContainer1: null,
         songContainer2: null,
@@ -55,6 +57,7 @@ export const appState: AppState = $state({
 })
 
 export const openPopup = (popup: string) => {
+    appState.showSearchResults = false;
     appState.popupData.popupType = popup;
     appState.popupData.popupShowing = true;
 }

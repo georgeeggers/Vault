@@ -7,10 +7,8 @@
     import ProjectView from "./mainpageModules/projectView.svelte";
     import Queue from "./mainpageModules/queue.svelte";
     import YourVault from "./mainpageModules/yourVault.svelte";
-    import AudioLines from "./modules/audioLines.svelte";
+    import { DEBUG_LEVEL } from "../backend/dev.svelte";
     import CurrentPlayingThumbnail from "./modules/currentPlayingThumbnail.svelte";
-    import PositionalAudioSelector from "./modules/positionalAudioSelector.svelte";
-    import { deleteSongsIfTheyExist } from "../backend/sql.svelte";
 
 
 </script>
@@ -50,11 +48,16 @@
             <p>{loadManager.currentSong ? loadManager.currentSong.song.name : ""}</p>
 
 
-
-            <div class="queueContainer">
-                <Queue />
-            </div>
-
+            {#if DEBUG_LEVEL == 0}
+                <div class="queueContainer">
+                    <Queue />
+                </div>
+            {:else}
+                {#each loadManager.preloads as p}
+                    <p style='font-family: monospace;'>{p.song.name} {p.howlInstance?.loaded ? "[X]" : "[ ]"}</p>
+                    <p>|</p>
+                {/each}
+            {/if}
 
         </div>
 
@@ -62,6 +65,11 @@
 </div>
 
 <style>
+
+    .thumbnail {
+        width: 280px;
+        height: 280px;
+    }
 
     .queueContainer {
         width: 100%;

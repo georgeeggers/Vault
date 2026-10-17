@@ -1,63 +1,17 @@
 <script lang="ts">
-    import { Ellipsis, Files, Folder, FolderPlus, Pause, Play, Plus, Search, Spool } from "@lucide/svelte";
+    import {  Pause, PenLine, Play, Plus, Search } from "@lucide/svelte";
     import { appState, openPopup } from "../../backend/appState.svelte";
     import { formatSeconds } from "../../backend/playerUtils.svelte";
     import PlaceholderImage from "../modules/placeholderImage.svelte";
-    import { getPlayingID, loadManager, loadQueueFromProjectV2, playPause, playSongInstantly } from "../../backend/howlManagers.svelte";
-    import type { PlayerProject, PlayerSongContainer } from "../../backend/sql.svelte";
-    import { debug } from "../../backend/dev.svelte";
-    import { beginEdit, editData } from "./songEditing/editSongs.svelte";
+    import { loadManager, loadQueueFromProjectV2, playPause } from "../../backend/howlManagers.svelte";
+    import type { PlayerProject } from "../../backend/sql.svelte";
+    import { beginEdit} from "./songEditing/editSongs.svelte";
     import { getProjectByID } from "../../backend/collectionUtils.svelte";
-    import AudioLines from "../modules/audioLines.svelte";
-
+    import { searchForProjects } from "../../backend/appUtils.svelte";
+    import ContentDisplay from "../modules/contentDisplay.svelte";
     let vaultSearchTerm = $state("");
 
-    const sortProjects = (projects: PlayerProject[], searchTerm: string) => {
-        return projects.filter((a) => {
-            for(let i of searchTerm.split(" ")){
-                if(a.name.toLowerCase().includes(searchTerm.toLowerCase())){
-                    return true;
-                } else if (i.toLowerCase().startsWith('totallength>')){
-                    try {
-                        const part = i.split(">")[1];
-                        if(a.totalLength >= parseInt(part)){
-                            return true;
-                        }
-                    } catch {
-                        debug("No parts found");
-                    }
-                } else if (i.startsWith('totalLength<')){
-                    try {
-                        const part = i.split("<")[1];
-                        if(a.totalLength <= parseInt(part)){
-                            return true;
-                        }
-                    } catch {
-                        debug("No parts found");
-                    }
-                } else if (i.startsWith('tracks>')){
-                    try {
-                        const part = i.split(">")[1];
-                        if(a.songs.length >= parseInt(part)){
-                            return true;
-                        }
-                    } catch {
-                        debug("No parts found");
-                    }
-                } else if (i.startsWith('tracks<')){
-                    try {
-                        const part = i.split("<")[1];
-                        if(a.songs.length >= parseInt(part)){
-                            return true;
-                        }
-                    } catch {
-                        debug("No parts found");
-                    }
-                }
-            }
-            return false;
-        }).toReversed();
-    }
+
 
     let playingProject = $derived(loadManager.currentSong ? getProjectByID(loadManager.currentSong.song.parentProject) : null);
 
@@ -91,74 +45,121 @@
         </button>
 
     </div>
-    {#each sortProjects(appState.projects, vaultSearchTerm) as project}
-        {#if project.id != "yourVault"}
-            <div class="projectLabel">
-                <div class="imgContainer">
-                    {#if project.thumbnail}
-                        <img alt='bleh' src='{project.thumbnail}'>
-                    {:else}
-                        <PlaceholderImage  />
-                    {/if}
-                </div>
+    {#if vaultSearchTerm != ""}
+        {@const data = searchForProjects(appState.projects, vaultSearchTerm)}
+        {#each data.projects as project}
+            {#if project.id != "yourVault"}
+                <div class="projectLabel" style='margin: 0px;'>
+                    <div class="imgContainer">
+                        {#if project.thumbnail}
+                            <img alt='bleh' src='{project.thumbnail}'>
+                        {:else}
+                            <PlaceholderImage  />
+                        {/if}
+                    </div>
 
-                <div class="projectLabelText">
-                    <p class='text1'>{project.name}</p>
-                    <p class='text2'>{formatSeconds(project.totalLength, true)}</p>
-                    {#if project.projectType == "single"}
-                        <p class='text2'>Single</p>
-                    {:else}
-                        <p class='text2'>{project.songs.length} tracks</p>
-                    {/if}
-                </div>
+                    <div class="projectLabelText">
+                        <p class='text1'>{project.name}</p>
+                        <p class='text2'>{formatSeconds(project.totalLength, true)}</p>
+                        {#if project.projectType == "single"}
+                            <p class='text2'>Single</p>
+                        {:else}
+                            <p class='text2'>{project.songs.length} tracks</p>
+                        {/if}
+                    </div>
 
-                <button class="playButton" onclick={() => processClick(project)}>
-                    <div class="hoverPlayPauseButton">
-                        {#if playingProject}
-                            {#if project.id == playingProject.id && loadManager.playing}
-                                <div class="svgWrapper">
-                                    <Pause size=37 fill='currentColor' strokeWidth={0}/>
-                                </div>
+                    <button class="playButton" onclick={() => processClick(project)}>
+                        <div class="hoverPlayPauseButton">
+                            {#if playingProject}
+                                {#if project.id == playingProject.id && loadManager.playing}
+                                    <div class="svgWrapper">
+                                        <Pause size=37 fill='currentColor' strokeWidth={0}/>
+                                    </div>
+                                {:else}
+                                    <div class="svgWrapper">
+                                        <Play size=37 fill='currentColor' strokeWidth={0}/>
+                                    </div>        
+                                {/if}
                             {:else}
                                 <div class="svgWrapper">
                                     <Play size=37 fill='currentColor' strokeWidth={0}/>
-                                </div>        
+                                </div>
                             {/if}
+                        </div>
+                    </button>
+
+                    <button class='songDataButton' onclick={() => beginEdit(project)}>
+                        <div class="svgWrapper">
+                            <PenLine size=16 />
+                        </div>
+                    </button>
+                </div>
+            {/if}
+        {/each}
+
+        {#each data.songs as songContainer}
+            <ContentDisplay displayType="song" data={songContainer}/>
+        {/each}
+
+    {:else}
+        {#each appState.projects.toReversed() as project}
+            {#if project.id != "yourVault"}
+                <div class="projectLabel">
+                    <div class="imgContainer">
+                        {#if project.thumbnail}
+                            <img alt='bleh' src='{project.thumbnail}'>
                         {:else}
-                            <div class="svgWrapper">
-                                <Play size=37 fill='currentColor' strokeWidth={0}/>
-                            </div>
+                            <PlaceholderImage  />
                         {/if}
                     </div>
-                </button>
 
-                <button class='songDataButton' onclick={() => beginEdit(project)}>
-                    <div class="svgWrapper">
-                        <Ellipsis size=20 />
+                    <div class="projectLabelText">
+                        <p class='text1'>{project.name}</p>
+                        <p class='text2'>{formatSeconds(project.totalLength, true)}</p>
+                        {#if project.projectType == "single"}
+                            <p class='text2'>Single</p>
+                        {:else}
+                            <p class='text2'>{project.songs.length} tracks</p>
+                        {/if}
                     </div>
-                </button>
-            </div>
-            {#each project.songs as songContainer, i}
-                <label class="songDataContainer {getPlayingID() == songContainer.id ? "playing" : ""}" for='play{songContainer.id}'>
-                    <p>{i + 1}</p>
-                    <div class="songData">
-                        <div class="songDataText">
-                            <p class='text1'>{songContainer.name}</p>
-                            <p class='text2'>{formatSeconds(songContainer.duration, true)}</p>
+
+                    <button class="playButton" onclick={() => processClick(project)}>
+                        <div class="hoverPlayPauseButton">
+                            {#if playingProject}
+                                {#if project.id == playingProject.id && loadManager.playing}
+                                    <div class="svgWrapper">
+                                        <Pause size=37 fill='currentColor' strokeWidth={0}/>
+                                    </div>
+                                {:else}
+                                    <div class="svgWrapper">
+                                        <Play size=37 fill='currentColor' strokeWidth={0}/>
+                                    </div>        
+                                {/if}
+                            {:else}
+                                <div class="svgWrapper">
+                                    <Play size=37 fill='currentColor' strokeWidth={0}/>
+                                </div>
+                            {/if}
                         </div>
-                    </div>
-                </label>
-                <button class='invis' id='play{songContainer.id}' onclick={() => playSongInstantly(songContainer)}>play{songContainer.id}</button>
-            {/each}
+                    </button>
 
-        {/if}
-    {/each}
+                    <button class='songDataButton' onclick={() => beginEdit(project)}>
+                        <div class="svgWrapper">
+                            <PenLine size=16 />
+                        </div>
+                    </button>
+                </div>
+                {#each project.songs as songContainer, i}
+                    <ContentDisplay displayType="song" data={songContainer} index={i + 1}/>
+                {/each}
+
+            {/if}
+        {/each}
+    {/if}
+
 </div>
 
 <style>
-
-
-
     .playButton {
         width: 60px;
         height: 60px;
@@ -224,89 +225,6 @@
 
     .vaultSearchContainer input::placeholder {
         color: var(--text7);
-    }
-
-    .songDataText {
-        display: flex;
-        flex-direction: column;
-        box-sizing: border-box;
-    }
-
-    .songDataText .text1 {
-        color: var(--text1);
-        font-size: 16px;
-
-        min-width: 40px;
-    }
-
-    .songDataText .text2 {
-        color: var(--text7);
-        font-size: 14px;
-    }
-
-    .songData {
-        height: 100%;
-        display: flex;
-        flex-direction: row;
-        width: 100%;
-        align-items: center;
-        padding: 0px 10px 0px 10px;
-        transition: background-color .25s;
-        box-sizing: border-box;
-    }
-
-    .songDataButton {
-        background: none;
-        border: none;
-        margin-left: auto;
-        cursor: pointer;
-        margin-left: 10px;
-        margin-right: 10px;
-    }
-
-    .songDataContainer {
-        width: 100%;
-        display: flex;
-        flex-direction: row;
-        height: 60px;
-        align-items: center;
-        padding: 0px 0px 0px 30px;
-        box-sizing: border-box;
-        gap: 20px;
-        cursor: pointer;
-    }
-
-    .songDataContainer > p, .songDataButton * {
-        color: var(--text7);
-        font-size: 16px;
-        transition: color .25s;
-    }
-
-
-
-    .songDataContainer:hover > p {
-        color: var(--text1);
-    }
-
-    .songDataButton:hover * {
-        color: var(--main5) !important;
-    }
-
-    .songDataContainer:hover .songData {
-        background-color: var(--bg1);
-    }
-
-    .playing > p {
-        color: var(--main5) !important;
-    }
-
-
-    .playing .songData {
-        background-color: var(--main3) !important;
-    }
-
-    .playing .songData * {
-        color: var(--text1);
     }
 
     .yourVault {

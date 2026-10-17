@@ -9,12 +9,13 @@
     import { fly } from "svelte/transition";
     import { X } from "@lucide/svelte";
     import { onDestroy, onMount } from "svelte";
-    import { loadManager, stopSong, unloadSongAtStart } from "./backend/howlManagers.svelte";
-    import { loadProjects } from "./backend/sql.svelte";
+    import { loadManager, stopSong, unloadAllSongs } from "./backend/howlManagers.svelte";
+    import { getTotalNumberOfSongData, loadProjects } from "./backend/sql.svelte";
     import { getTheme } from "./backend/settings.svelte";
 
     onMount(async () => {
       console.log("We just loading here. Switch out for another place when we eventually get onboarding working");
+      console.log(await getTotalNumberOfSongData());
       loadProjects();
     })
 
@@ -22,9 +23,8 @@
         if(loadManager.currentSong){
           stopSong(loadManager.currentSong.song)
         }
-        while(loadManager.preloads.length > 0){
-          unloadSongAtStart();
-        }
+        loadManager.currentSong = null;
+        unloadAllSongs();
     })
 
 </script>
@@ -90,12 +90,7 @@
     flex-direction: column;
   }
 
-  .topbarContainer {
-    width: 100%;
-    min-height: 60px;
-    height: 60px;
-    z-index: 2;
-  }
+
   
   .contentArea {
     height: calc(100% - 60px);

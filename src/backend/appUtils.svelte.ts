@@ -1,3 +1,4 @@
+import type { PlayerProject, PlayerSongContainer } from "./sql.svelte";
 
 /**
  * Returns the input number if greater than 0, and 0 otherwise
@@ -95,4 +96,37 @@ export const addNotification = (body: string, notifType: string, time = 10000) =
 export const copyText = async (text: string) => {
     await navigator.clipboard.writeText(text);
     addNotification("CSS Copied!", "success");
+}
+
+
+
+
+export const searchForProjects = (projects: PlayerProject[], searchTerm: string) => {
+
+    const output: {
+        projects: PlayerProject[],
+        songs: PlayerSongContainer[],
+    } = {
+        projects: [],
+        songs: [],
+    }
+
+    output.projects = projects.filter((a) => {
+        if(a.name == "Your Vault"){
+            return false;
+        }
+        if(a.name.toLowerCase().includes(searchTerm.toLowerCase())){
+            return true;
+        }
+        return false;
+    }).toReversed();
+
+    output.songs = projects[0].songs.filter((a) => {
+        if(a.name.toLowerCase().includes(searchTerm.toLowerCase())){
+            return true;
+        }
+        return false;
+    }).toReversed();
+
+    return output;
 }

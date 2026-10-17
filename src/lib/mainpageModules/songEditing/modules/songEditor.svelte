@@ -1,10 +1,10 @@
 <script lang='ts'>
 
-    import { AppWindow, ChevronDown, ChevronUp, Disc3, FrownIcon, Music, Plus, SaveCheck, Trash2, Upload, X } from "@lucide/svelte";
+    import { AppWindow, ChevronDown, ChevronUp, Disc3, FrownIcon, Music, Plus, SaveCheck, ShieldAlert, Trash, Trash2, Upload, X } from "@lucide/svelte";
     import { onDestroy, onMount } from "svelte";
     import type { Errors, UploadDataContainer, UploadProject } from "./uploading.svelte";
     import { addNotification, getID } from "../../../../backend/appUtils.svelte";
-    import { b64ToString, dataUrlToB64, deleteSongsIfTheyExist, getDBDataFromProject, loadProjects, saveOrUpdateProject, saveOrUpdateSong, saveOrUpdateSongData, type PlayerProject, type PlayerSongContainer, type PlayerSongData } from "../../../../backend/sql.svelte";
+    import { b64ToString, dataUrlToB64, deleteProject, deleteSongsIfTheyExist, getDBDataFromProject, loadProjects, saveOrUpdateProject, saveOrUpdateSong, saveOrUpdateSongData, type PlayerProject, type PlayerSongContainer, type PlayerSongData } from "../../../../backend/sql.svelte";
     import { calcTempo } from "../../../../backend/bpmGuessing";
     import { appState, closePopup, lockPopup, unlockPopup } from "../../../../backend/appState.svelte";
     import PlaceholderImage from "../../../modules/placeholderImage.svelte";
@@ -67,6 +67,7 @@
     }
 
     async function handleFileChange(e: Event, target: number){
+        draggingFile = false;
         e.preventDefault();
         if(projectData.saving){
             return
@@ -271,15 +272,12 @@
                 saveProgress++;
             }
 
+            await deleteSongsIfTheyExist(deletedIds);
             projectData.saving = false;
-            deleteSongsIfTheyExist(deletedIds);
             unlockPopup();
             closePopup();
             addNotification("Project Saved!", 'succcess');
-            appState.projects.length = 0;
-            setTimeout(() => {
-                loadProjects();
-            }, 50);
+            loadProjects();
         }
     }
 
@@ -288,238 +286,301 @@
         deletedIds.push(id);
     }
 
+    let draggingFile = $state(false);
+
+    let verifyDeleteIntention = $state(false);
+    let deleting = $state(false);
+
+
+    const attemptDelete = async () => {
+        if(!verifyDeleteIntention){
+            verifyDeleteIntention = true;
+            setTimeout(() => {
+                verifyDeleteIntention = false;
+            }, 5000);
+        } else {
+            lockPopup()
+            deleting = true;
+            await deleteProject(projectData.projectId);
+            unlockPopup();
+            closePopup();
+            addNotification("Project Deleted!", 'succcess');
+            loadProjects();
+        }
+    }
+
 </script>
 
 
 <div class="projectCreator scrollOverflow">
-    <div class="projectRow">
-        <label class='projectThumbnail' for='uploadThumbnail'
-            ondrop={(e) => {
-                e.preventDefault();
-                handleFileChange(e, -1);
-            }}
-
-            ondragover={(e) => {
-                e.preventDefault();
-            }}
-
-            ondragenter={(e) => {
-                e.preventDefault()
-            }}
-
-            ondragleave={(e) => {
-                e.preventDefault()
-            }}           
-        >
-            {#if projectData.thumbnail == ""}
-                <!--
-                
-            
-            
-                -->
-                {#if projectData.projectType == 'single'}
-                    <PlaceholderImage />
-                {:else}
-                    <PlaceholderImage />
-                {/if}
-
-            {:else}
-                <img src='{projectData.thumbnail}' alt='ERROR'>
-            {/if}
-            <div class="uploadPopup">
-                <div class="svgWrapper" style='color: var(--text1);'>
-                    <Upload size=64 />
-                </div>
-            </div>
-        </label>
-        <input type='file' 
-            class='invis'
-            id='uploadThumbnail'
-            accept="image/*"
-            onchange={(event) => handleFileChange(event, -1)}
-            ondrop={(e) => handleFileChange(e, -1)}
-        >
-
-        <div class="projectColumn">
-            {#if projectData.projectType == "multiple"}
-                <input type='text' bind:value={projectData.projectName} placeholder="Project" id='nameProject' autocapitalize="off" autocorrect="off" autocomplete='off' class='{projectData.errors.projectName ? "error" : "noBorder"} {saveProgress >= 1 ? "saveProgressComplete" : ""}'>
-            {:else}
-                <input type='text' bind:value={projectData.songData[0].song.name} placeholder="Project" id='nameProject' autocapitalize="off" autocorrect="off" autocomplete='off' class='{projectData.errors.projectName ? "error" : "noBorder"} {saveProgress >= 1 ? "saveProgressComplete" : ""}'>
-            {/if}
-
-            <div class="projectLabelText">
-                <p class='text2'>{formatSeconds(totalLength, true)}</p>
-                {#if projectData.projectType == "single"}
-                    <p class='text2'>Single</p>
-                {:else}
-                    <p class='text2'>{projectData.songData.length} tracks</p>
-                {/if}
-            </div>
-        </div>
-    </div>
-
-    <div class="spacer">
-
-    </div>
-
-    {#if projectData.projectType == 'multiple'}
+    {#if !deleting}
         <div class="projectRow">
-            <p>Tracks</p>
-            <button class='btn main {projectData.errors.projectLength ? "error" : "noBorder"}' onclick={addSong} >
-                <div class="svgWrapper">
-                    <Plus size=16 />
-                </div>
-                Add Song
-            </button>
-        </div>
-    {/if}
+            <label class='projectThumbnail' for='uploadThumbnail'
+                ondrop={(e) => {
+                    e.preventDefault();
+                    handleFileChange(e, -1);
+                }}
 
-    {#each projectData.songData as upload, i}
-        <div class="songDataContainer">
-            <p>{String(i + 1).padStart(String(projectData.songData.length).length, '0')}</p>
-            <div class="songData">
-                <div class="songDataText">
-                    <input class='songName {upload.errors.name ? "error" : "noBorder"} {saveProgress >= i + 2 ? "saveProgressComplete" : ""}' placeholder="Track {i + 1}" bind:value={upload.song.name} autocapitalize="off" autocorrect="off" autocomplete='off'>
-                    <label class="bpmInput" for='bpmSelector{i}'>
-                        <input bind:value={upload.song.bpm} placeholder="0" id='bpmSelector{i}'>
-                        <p>bpm</p>
-                    </label>
-                </div>
+                ondragover={(e) => {
+                    e.preventDefault();
+                }}
 
+                ondragenter={(e) => {
+                    e.preventDefault()
+                }}
 
-                <label class="uploadHandler {upload.errors.content ? "error" : "noBorder"} {saveProgress >= i + 2 + projectData.songData.length ? "saveProgressComplete" : ""}" style='margin-left: auto;' for='uploadFile{upload.song.id}'
-                    ondrop={(e) => {
-                        e.preventDefault();
-                        handleFileChange(e, i);
-                    }}
-
-                    ondragover={(e) => {
-                        e.preventDefault();
-                    }}
-
-                    ondragenter={(e) => {
-                        e.preventDefault()
-                    }}
-
-                    ondragleave={(e) => {
-                        e.preventDefault()
-                    }}           
-                >
-                    {#if projectData.songData[i].songData.content == ""}
-                        <div class="svgWrapper">
-                            <Upload size=20 />
-                        </div>
+                ondragleave={(e) => {
+                    e.preventDefault()
+                }}           
+            >
+                {#if projectData.thumbnail == ""}
+                    <!--
+                    
+                
+                
+                    -->
+                    {#if projectData.projectType == 'single'}
+                        <PlaceholderImage />
                     {:else}
-                        <div class="svgWrapper" style='color: var(--main5);'>
-                            <Music size=20 />
-                        </div>
+                        <PlaceholderImage />
                     {/if}
 
-                </label>
-
-                <input type='file' id='uploadFile{upload.song.id}' class='invis'
-                    accept="audio/*"
-                    onchange={(event) => handleFileChange(event, i)}
-                    ondrop={(e) => handleFileChange(e, i)}
-                >
-
-                {#if projectData.songData.length > 1}
-
-                    <button class="uploadHandler" onclick={() => moveSong(i)}>
-                        <div class="svgWrapper">
-                            <ChevronUp size=20/>
-                        </div>
-                    </button>
-
-                    <button class="uploadHandler" onclick={() => moveSong(i, false)}>
-                        <div class="svgWrapper">
-                            <ChevronDown size=20/>
-                        </div>
-                    </button>
-
+                {:else}
+                    <img src='{projectData.thumbnail}' alt='ERROR'>
                 {/if}
+                <div class="uploadPopup">
+                    <div class="svgWrapper" style='color: var(--text1);'>
+                        <Upload size=64 />
+                    </div>
+                </div>
+            </label>
+            <input type='file' 
+                class='invis'
+                id='uploadThumbnail'
+                accept="image/*"
+                onchange={(event) => handleFileChange(event, -1)}
+                ondrop={(e) => handleFileChange(e, -1)}
+            >
 
+            <div class="projectColumn">
                 {#if projectData.projectType == "multiple"}
-
-                    <button class="uploadHandler" onclick={() => deleteSong(i)}>
-                        <div class="svgWrapper">
-                            <Trash2 size=20/>
-                        </div>
-                    </button>
-
+                    <input type='text' bind:value={projectData.projectName} placeholder="Project" id='nameProject' autocapitalize="off" autocorrect="off" autocomplete='off' class='{projectData.errors.projectName ? "error" : "noBorder"} {saveProgress >= 1 ? "saveProgressComplete" : ""}'>
+                {:else}
+                    <input type='text' bind:value={projectData.songData[0].song.name} placeholder="Project" id='nameProject' autocapitalize="off" autocorrect="off" autocomplete='off' class='{projectData.errors.projectName ? "error" : "noBorder"} {saveProgress >= 1 ? "saveProgressComplete" : ""}'>
                 {/if}
 
+                <div class="projectLabelText">
+                    <p class='text2'>{formatSeconds(totalLength, true)}</p>
+                    {#if projectData.projectType == "single"}
+                        <p class='text2'>Single</p>
+                    {:else}
+                        <p class='text2'>{projectData.songData.length} tracks</p>
+                    {/if}
+                </div>
             </div>
         </div>
-    {/each}
 
-    {#if projectData.projectType == "multiple"}
-        <label id='multiUpload' for='quickUpload'
-            ondrop={(e) => {
-                e.preventDefault();
-                handleFileChange(e, -2);
-            }}
 
-            ondragover={(e) => {
-                e.preventDefault();
-            }}
 
-            ondragenter={(e) => {
-                e.preventDefault()
-            }}
-
-            ondragleave={(e) => {
-                e.preventDefault()
-            }}           
-        >
-            <div class="svgWrapper" style='color: var(--text1);'>
-                <Upload size=20 />
+        {#if projectData.projectType == 'multiple'}
+            <div class="projectRow">
+                <p>Tracks</p>
+                <button class='btn main {projectData.errors.projectLength ? "error" : "noBorder"}' onclick={addSong} >
+                    <div class="svgWrapper">
+                        <Plus size=16 />
+                    </div>
+                    Add Song
+                </button>
             </div>
-            <p style='color: var(--text1);'>Upload Multiple</p>
-        </label>
-        <input type='file' id='quickUpload'
-            class='invis'
-            multiple
-            accept="audio/*"
-            onchange={(event) => handleFileChange(event, -2)}
-            ondrop={(e) => handleFileChange(e, -2)}
-        >
+        {/if}
+
+        {#each projectData.songData as upload, i}
+            <div class="songDataContainer">
+                <p>{String(i + 1).padStart(String(projectData.songData.length).length, '0')}</p>
+                <div class="songData">
+                    <div class="songDataText">
+                        <input class='songName {upload.errors.name ? "error" : "noBorder"} {saveProgress >= i + 2 ? "saveProgressComplete" : ""}' placeholder="Track {i + 1}" bind:value={upload.song.name} autocapitalize="off" autocorrect="off" autocomplete='off'>
+                        <label class="bpmInput" for='bpmSelector{i}'>
+                            <input bind:value={upload.song.bpm} placeholder="0" id='bpmSelector{i}'>
+                            <p>bpm</p>
+                        </label>
+                    </div>
+
+
+                    <label class="uploadHandler {upload.errors.content ? "error" : "noBorder"} {saveProgress >= i + 2 + projectData.songData.length ? "saveProgressComplete" : ""}" style='margin-left: auto;' for='uploadFile{upload.song.id}'
+                        ondrop={(e) => {
+                            e.preventDefault();
+                            handleFileChange(e, i);
+                        }}
+
+                        ondragover={(e) => {
+                            e.preventDefault();
+                        }}
+
+                        ondragenter={(e) => {
+                            e.preventDefault()
+                        }}
+
+                        ondragleave={(e) => {
+                            e.preventDefault()
+                        }}           
+                    >
+                        {#if projectData.songData[i].songData.content == ""}
+                            <div class="svgWrapper">
+                                <Upload size=20 />
+                            </div>
+                        {:else}
+                            <div class="svgWrapper" style='color: var(--main5);'>
+                                <Music size=20 />
+                            </div>
+                        {/if}
+
+                    </label>
+
+                    <input type='file' id='uploadFile{upload.song.id}' class='invis'
+                        accept="audio/*"
+                        onchange={(event) => handleFileChange(event, i)}
+                        ondrop={(e) => handleFileChange(e, i)}
+                    >
+
+                    {#if projectData.songData.length > 1}
+
+                        <button class="uploadHandler" onclick={() => moveSong(i)}>
+                            <div class="svgWrapper">
+                                <ChevronUp size=20/>
+                            </div>
+                        </button>
+
+                        <button class="uploadHandler" onclick={() => moveSong(i, false)}>
+                            <div class="svgWrapper">
+                                <ChevronDown size=20/>
+                            </div>
+                        </button>
+
+                    {/if}
+
+                    {#if projectData.projectType == "multiple"}
+
+                        <button class="uploadHandler" onclick={() => deleteSong(i)}>
+                            <div class="svgWrapper">
+                                <Trash2 size=20/>
+                            </div>
+                        </button>
+
+                    {/if}
+
+                </div>
+            </div>
+        {/each}
+
+        {#if projectData.projectType == "multiple"}
+            <label id='multiUpload' for='quickUpload' style='border: 2px solid {draggingFile ? "var(--main5); background-color: var(--bg1);" : "transparent"}'
+                ondrop={(e) => {
+                    e.preventDefault();
+                    handleFileChange(e, -2);
+                }}
+
+                ondragover={(e) => {
+                    e.preventDefault();
+                    draggingFile = true;
+                }}
+
+                ondragenter={(e) => {
+                    e.preventDefault();
+                    draggingFile = true;
+                }}
+
+                ondragleave={(e) => {
+                    e.preventDefault()
+                    draggingFile = false;
+                }}           
+            >
+                <div class="svgWrapper" style='color: var(--text1);'>
+                    <Upload size=20 />
+                </div>
+                <p style='color: var(--text1);'>Upload Multiple</p>
+            </label>
+            <input type='file' id='quickUpload'
+                class='invis'
+                multiple
+                accept="audio/*"
+                onchange={(event) => handleFileChange(event, -2)}
+                ondrop={(e) => handleFileChange(e, -2)}
+            >
+        {/if}
+
+        <div class="projectRow" style='margin-top: auto;'>
+
+            {#if !projectData.saving}
+                <button class='btn fail' style='' onclick={closePopup}>
+                    <div class="svgWrapper">
+                        <X size=20 />
+                    </div>
+                    <p>Exit</p>
+                </button>
+
+                <button class='btn fail' style='' onclick={attemptDelete}>
+                    {#if !verifyDeleteIntention}
+                        <div class="svgWrapper">
+                            <Trash size=20 />
+                        </div>
+                        <p>Delete</p>
+                    {:else}
+                        <div class="svgWrapper">
+                            <ShieldAlert size=20 />
+                        </div>
+                        <p>You Sure?</p>    
+                    {/if}
+                </button>
+
+            {/if}
+
+            {#if !projectData.saving}
+                <button class='btn main' style='margin-left: auto; width: 125px;' onclick={attemptSave}>
+                    <div class="svgWrapper">
+                        <SaveCheck size=20 />
+                    </div>
+                    <p>Save Project</p>
+                </button>
+            {:else}
+                <div id="saveProgress">
+                    <div id="saveProgressBar" style='width: calc((100% - 20px)* {saveProgress / maxSaveTime});'>
+
+                    </div>
+                    <div id="saveProgressBarIncomplete">
+                        
+                    </div>
+                </div>
+            {/if}
+        </div>
+    {:else}
+        <div class="deletingNotification">
+            <div class="svgWrapper deleting">
+                <Trash size=128 />
+            </div>
+            <p>Deleting</p>
+        </div>
+
     {/if}
-
-    <div class="projectRow" style='margin-top: auto;'>
-
-        {#if !projectData.saving}
-            <button class='btn fail' style='' onclick={closePopup}>
-                <div class="svgWrapper">
-                    <X size=20 />
-                </div>
-                <p>Exit</p>
-            </button>
-        {/if}
-
-        {#if !projectData.saving}
-            <button class='btn main' style='margin-left: auto; width: 125px;' onclick={attemptSave}>
-                <div class="svgWrapper">
-                    <SaveCheck size=20 />
-                </div>
-                <p>Save Project</p>
-            </button>
-        {:else}
-            <div id="saveProgress">
-                <div id="saveProgressBar" style='width: calc((100% - 20px)* {saveProgress / maxSaveTime});'>
-
-                </div>
-                <div id="saveProgressBarIncomplete">
-                    
-                </div>
-            </div>
-        {/if}
-    </div>
-
 </div>
 
 
 <style>
+
+    .deleting {
+        animation: deleting 30s ease-in infinite;
+    }
+
+    .deletingNotification {
+        display: flex;
+        width: 100%;
+        height: 100%;
+        align-items: center;
+        justify-content: center;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
 
     .bpmInput {
         width: fit-content;
@@ -551,7 +612,7 @@
         justify-content: center;
         gap: 10px;
         cursor: pointer;
-        transition: background-color .25s;
+        transition: background-color .25s, border .25s;
     }
 
     #multiUpload:hover {
@@ -559,7 +620,7 @@
     }
 
     #saveProgress {
-        width: 125px;
+        width: 100%;
         height: 40px;
         background-color: var(--bg1);
         margin-left: auto;

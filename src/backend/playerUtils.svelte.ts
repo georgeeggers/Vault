@@ -4,7 +4,7 @@ import { addNotification } from "./appUtils.svelte"
 import { debug } from "./dev.svelte"
 import { type PlayerSongContainer } from "./sql.svelte"
 import { replace } from "svelte-spa-router"
-import { loadManager, loadNextSongsFromQueue } from "./howlManagers.svelte"
+import { loadManager, loadNextSongsFromQueue, loadSong } from "./howlManagers.svelte"
 
 export type QueueManager = {
     currentQueue: PlayerSongContainer[],
@@ -95,3 +95,18 @@ export const toggleMiniplayer = () => {
         replace("/")
     }
 }
+
+export const getCurrentQueue = () => {
+    return appState.player.queueManager.shuffle ? appState.player.queueManager.shuffleQueue : appState.player.queueManager.currentQueue
+}
+
+export const addToQueue = (p: PlayerSongContainer) => {
+    if(appState.player.queueManager.shuffle){
+        appState.player.queueManager.shuffleQueue.unshift(p);
+    } else {
+        appState.player.queueManager.currentQueue.unshift(p);
+    }
+    
+    loadNextSongsFromQueue(getCurrentQueue());
+}
+

@@ -17,13 +17,14 @@ Favorites or pinned
 !!! 
 
 Recently played queue
-Edit projects
-delete projects
 settings
 lyric manager
 add songs to queue
 dropdown menu for editing or deleting
+media control hotkeys
+    https://github.com/Taiizor/tauri-plugin-media
 
+add auto-generating artists tab (maybe)
 
 !!!
 

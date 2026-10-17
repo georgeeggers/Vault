@@ -1,6 +1,6 @@
 import { addNotification } from "./appUtils.svelte"
 
-const DEBUG_LEVEL: number = 0;
+export const DEBUG_LEVEL: number = 0;
 
 export const debug = (...messages: any) => {
     if(DEBUG_LEVEL >= 1){

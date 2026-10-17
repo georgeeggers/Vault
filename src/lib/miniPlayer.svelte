@@ -44,7 +44,6 @@
         position: absolute;
         top: 0px;
         left: 0px;
-        width: 100%;
         z-index: 2;
     }
 
@@ -67,6 +66,7 @@
         background-color: var(--bg0);
         backdrop-filter: blur(5px);
         bottom: 0px;
+        z-index: 1;
     }
 
     .miniplayer {
@@ -91,7 +91,7 @@
         transition: opacity .5s;
     }
 
-    .miniplayer:hover > .hideTillHover {
+    .topbarContainer:hover {
         opacity: 1.0;
     }
 

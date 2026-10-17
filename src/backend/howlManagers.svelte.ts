@@ -3,7 +3,7 @@ import PlayerControls from "../lib/mainpageModules/playerControls.svelte"
 import { appState } from "./appState.svelte"
 import { addNotification, getID } from "./appUtils.svelte"
 import { debug } from "./dev.svelte"
-import { seek, shuffle, startPlaybarTracking, stopPlaybarTracking, stopSeek } from "./playerUtils.svelte"
+import { getCurrentQueue, seek, shuffle, startPlaybarTracking, stopPlaybarTracking, stopSeek } from "./playerUtils.svelte"
 import { loadSongData, type PlayerProject, type PlayerSongContainer, type PlayerSongData } from "./sql.svelte"
 
 export type HowlInstanceV2 = {
@@ -86,27 +86,38 @@ export const getHowlInstanceV2 = (songData: PlayerSongData, songContainer: Playe
     return howlContainer;
 }
 
+export const indexOfID = (id: string, songs: PlayerSongContainer[]) => {
+    let index = 0;
+    for(let i of songs){
+        if(i.id == id){
+            return index;
+        }
+        index++;
+    }
+    return -1;
+}
+
 // lots of toomfoolery here to stop memory leaks and random howler instances causing issues
-export const unloadSongAtStart = () => {
-    const p = loadManager.preloads.shift();
+// there is 100% a better way to do this, but we ball
+export const unloadLeastLikelySong = () => {
 
-    if(p?.song){
-        appState.player.queueManager.recentlyPlayed.unshift(p.song);
+    let nextSongs: PlayerSongContainer[] = [];
+    // remove the ids of everything loaded
+    for(let i = 0; i < loadManager.maxSize - 1; i++){
+        nextSongs.push(getCurrentQueue()[i]);
     }
-    
 
-    if(p){
-        if(p.howlInstance){
-            p.howlInstance.howl?.unload();
-            p.howlInstance.howl = null;
-            p.howlInstance = null;
+    // fetch next X songs in queue, and current playing song
+    for(let i of loadManager.preloads){
+        if(i.song.id == loadManager.currentSong?.song.id || indexOfID(i.song.id, nextSongs) != -1){
+            continue;
         }
 
-        if(p.songData){
-            URL.revokeObjectURL(p.songData.content);
-        }
-
+        console.log("unloading ", i.song.name);
+        unloadSong(i.song);
+        break;
     }
+
 }
 
 export const unloadSong = (songContainer : PlayerSongContainer) => {
@@ -148,33 +159,37 @@ export const loadSong = async (songContainer: PlayerSongContainer) => {
     if(isSongAlreadyLoaded(songContainer)){
         return;
     }
-
+    const snapshot =  $state.snapshot(songContainer);
     let temp: LoadInstance = $state({
         playing: false,
         howlInstance: null,
-        song: songContainer,
+        song: snapshot,
         songData: null
     });
     
     if(loadManager.preloads.length >= loadManager.maxSize){
-        unloadSongAtStart();
+        unloadLeastLikelySong();
     }
 
     loadManager.preloads.push(temp);
 
-    const songData: PlayerSongData | null = await loadSongData(songContainer);
+    const songData: PlayerSongData | null = await loadSongData(snapshot);
     temp.songData = songData;
     if(!songData){
         addNotification("Could not load song data :(", 'fail');
     } else {
-        const howlInstanceV2 = getHowlInstanceV2(songData, songContainer);
+        const howlInstanceV2 = getHowlInstanceV2(songData, snapshot);
         temp.howlInstance = howlInstanceV2
     }
 }
 
 // this will not actually remove songs from the queue, and will just try to load enough items from the queue to fill the loadManager.preloads array
 export const loadNextSongsFromQueue = (queue: PlayerSongContainer[]) => {
-    for(let i = 0; i < loadManager.maxSize; i++){
+    let size = 0;
+    if(loadManager.currentSong){
+        size = 1;
+    }
+    for(let i = 0; i < loadManager.maxSize - size; i++){
         if(queue[i]){
             loadSong(queue[i]);
         }
@@ -246,7 +261,7 @@ export const playSong = (song: PlayerSongContainer) => {
 
                     if(i.howlInstance?.howl){
                         if(loadManager.currentSong){
-                            if(loadManager.currentSong.song == song){
+                            if(loadManager.currentSong.song.id == song.id){
                                 i.playing = true;
                                 loadManager.playing = true;
                                 i.howlInstance.howl.seek(appState.player.sliderProgress / 100);
@@ -281,6 +296,7 @@ export const playNextSongFromQueue = async (queue: PlayerSongContainer[]) => {
         stopPlaybarTracking();
         if(loadManager.preloads.length == loadManager.maxSize){
             unloadSong(loadManager.currentSong.song);
+            loadManager.currentSong = null;
             loadNextSongsFromQueue(queue);
         }
         
@@ -332,8 +348,11 @@ export const getPlayingID = () => {
 
 export const playSongInstantly = (songContainer: PlayerSongContainer) => {
     if(loadManager.currentSong){
-        if(loadManager.currentSong.song == songContainer){
+        if(loadManager.currentSong.song.id == songContainer.id){
+            // this exits early in the event the song you want to play is already playing
             return;
+        } else {
+            stopSong(loadManager.currentSong.song); 
         }
     }
     appState.player.duration = 0;
@@ -380,7 +399,11 @@ export const backTrack = () => {
     }
 }
 
-
+export const unloadAllSongs = () => {
+    for(let i of loadManager.preloads){
+        unloadSong(i.song);
+    }
+}
 
 
 

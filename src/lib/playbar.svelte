@@ -74,6 +74,7 @@
     box-sizing: border-box;
     padding: 10px;
     flex-direction: row;
+    overflow: hidden;
 }
 
 .playerControlsContainer {

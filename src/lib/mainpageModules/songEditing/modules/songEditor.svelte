@@ -1,12 +1,12 @@
 <script lang='ts'>
 
-    import { AppWindow, ChevronDown, ChevronUp, Disc3, FrownIcon, Music, Plus, SaveCheck, ShieldAlert, Trash, Trash2, Upload, X } from "@lucide/svelte";
-    import { onDestroy, onMount } from "svelte";
-    import type { Errors, UploadDataContainer, UploadProject } from "./uploading.svelte";
+    import { ChevronDown, ChevronUp, Music, Plus, SaveCheck, ShieldAlert, Trash, Trash2, Upload, X } from "@lucide/svelte";
+    import { onDestroy } from "svelte";
+    import type { UploadDataContainer, UploadProject } from "./uploading.svelte";
     import { addNotification, getID } from "../../../../backend/appUtils.svelte";
-    import { b64ToString, dataUrlToB64, deleteProject, deleteSongsIfTheyExist, getDBDataFromProject, loadProjects, saveOrUpdateProject, saveOrUpdateSong, saveOrUpdateSongData, type PlayerProject, type PlayerSongContainer, type PlayerSongData } from "../../../../backend/sql.svelte";
+    import { deleteProject, deleteSongsIfTheyExist, getDBDataFromProject, loadProjects, saveOrUpdateProject, saveOrUpdateSong, saveOrUpdateSongData, type PlayerProject, type PlayerSongContainer, type PlayerSongData } from "../../../../backend/sql.svelte";
     import { calcTempo } from "../../../../backend/bpmGuessing";
-    import { appState, closePopup, lockPopup, unlockPopup } from "../../../../backend/appState.svelte";
+    import { closePopup, lockPopup, unlockPopup } from "../../../../backend/appState.svelte";
     import PlaceholderImage from "../../../modules/placeholderImage.svelte";
     import { formatSeconds } from "../../../../backend/playerUtils.svelte";
 

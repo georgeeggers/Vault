@@ -1,3 +1,4 @@
+import { appState } from "./appState.svelte";
 import type { PlayerProject, PlayerSongContainer } from "./sql.svelte";
 
 /**
@@ -98,8 +99,61 @@ export const copyText = async (text: string) => {
     addNotification("CSS Copied!", "success");
 }
 
+type SearchItem = {
+    data: PlayerProject,
+    dataType: "project"
+} | {
+    data: PlayerSongContainer,
+    dataType: "song"
+}
 
+export const applyTypeFilter = (input: SearchItem[], dataType: string) => {
+    return input.filter((a) => {
+        if(a.dataType == "project"){
+            if(a.data.projectType == dataType){
+                return true;
+            }
+        } else {
+            if(dataType == "song"){
+                return true;
+            }
+        }
+        return false;
+    })
 
+}
+
+export const getIdByProjectName = (name: string) => {
+    for(let i of appState.projects){
+        if(i.name.toLowerCase() == name.toLowerCase()){
+            return i.id;
+        }
+    }
+    return "";
+}
+
+export const applyParentFilter = (input: SearchItem[], parent: string) => {
+    const id = getIdByProjectName(parent);
+    return input.filter((a) => {
+        if(a.dataType == 'song'){
+            if(a.data.parentProject == id){
+                return true;
+            }
+        }
+
+        return false;
+    })
+}
+
+export const applyNameFilter = (input: SearchItem[], nameFilter: string) => {
+    return input.filter((a) => {
+        if(a.data.name.toLowerCase().includes(nameFilter.toLowerCase())){
+            return true;
+        }
+        return false;
+    })
+   
+}
 
 export const searchForProjects = (projects: PlayerProject[], searchTerm: string) => {
 

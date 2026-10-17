@@ -5,18 +5,19 @@
     import { routes } from "./routes.svelte";
     import { appState } from "./backend/appState.svelte";
     import Playbar from "./lib/playbar.svelte";
-    import { notifications } from "./backend/appUtils.svelte";
+    import { levenshtein, notifications } from "./backend/appUtils.svelte";
     import { fly } from "svelte/transition";
     import { X } from "@lucide/svelte";
     import { onDestroy, onMount } from "svelte";
     import { loadManager, stopSong, unloadAllSongs } from "./backend/howlManagers.svelte";
     import { getTotalNumberOfSongData, loadProjects } from "./backend/sql.svelte";
-    import { getTheme } from "./backend/settings.svelte";
+    import { getTheme, initSettings } from "./backend/settings.svelte";
 
     onMount(async () => {
       console.log("We just loading here. Switch out for another place when we eventually get onboarding working");
       console.log(await getTotalNumberOfSongData());
-      loadProjects();
+      await initSettings();
+      await loadProjects();
     })
 
     onDestroy(() => {

@@ -66,14 +66,16 @@
         </label>
 
         <div class="searchResults scrollOverflow"
-            style="height: min({(searchResults.projects.length + searchResults.songs.length) * 70 + 12}px, 80vh);"
+            style="height: min({searchResults.length * 70 + 12}px, 80vh);"
         >
-            {#each searchResults.projects as project}
-                <ContentDisplay data={project} displayType="project" />
-            {/each}
 
-            {#each searchResults.songs as song, i}
-                <ContentDisplay data={song} displayType="song" />
+            {#each searchResults as result, i}
+                <!-- We have to use this conditional because typescript yells at me and... it scares me :( -->
+                {#if result.dataType == 'project'}
+                    <ContentDisplay data={result.data} displayType="project"/>
+                {:else}
+                    <ContentDisplay data={result.data} displayType="song" />
+                {/if}
             {/each}
         </div>
     {/if}

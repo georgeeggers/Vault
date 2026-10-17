@@ -1,6 +1,7 @@
 <script lang='ts'>
     import { appState } from "../../backend/appState.svelte";
     import { getProjectByID } from "../../backend/collectionUtils.svelte";
+    import { settingsMirror } from "../../backend/settings.svelte";
     import type { PlayerSongContainer } from "../../backend/sql.svelte";
     import CurrentPlayingThumbnail from "../modules/currentPlayingThumbnail.svelte";
     import PlaceholderImage from "../modules/placeholderImage.svelte";
@@ -11,7 +12,7 @@
         let output = [];
         for(let i of queue){
             output.push(i);
-            if(output.length > appState.settings.queueDisplaySize){
+            if(output.length > settingsMirror.queueDisplaySize){
                 return output;
             }
         }

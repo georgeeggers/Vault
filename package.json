@@ -23,6 +23,7 @@
     "@lucide/svelte": "^1.41.0",
     "@tauri-apps/cli": "^2.11.4",
     "@tauri-apps/plugin-sql": "^2.4.1",
+    "@tauri-apps/plugin-store": "^2.5.0",
     "howler": "^2.2.4",
     "music-tempo": "^1.0.3",
     "pocketbase": "^0.28.1",

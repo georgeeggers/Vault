@@ -14,14 +14,14 @@ Favorites or pinned
  | [ ] Maybe use a bento-style layout for these. Probably gonna have to generate this somehow with javascript
 
 
+
+redo queue system to have a seperate user queue and app queue. this way we can ensure when a user adds something to queue it processes correctly
+
 !!! 
 
 Recently played queue
-settings
 lyric manager
-add songs to queue
-dropdown menu for editing or deleting
-media control hotkeys
+media control
     https://github.com/Taiizor/tauri-plugin-media
 
 add auto-generating artists tab (maybe)

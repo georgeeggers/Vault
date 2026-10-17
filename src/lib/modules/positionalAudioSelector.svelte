@@ -1,23 +1,23 @@
 <script lang='ts'>
     import { onMount } from "svelte";
     import { loadManager } from "../../backend/howlManagers.svelte";
+    import { saveMirrorValueToStore, settingsMirror } from "../../backend/settings.svelte";
 
     let dragging: boolean = $state(false);
     let draggerX = $state(59);
     let draggerY = $state(59);
     
     onMount(() => {
-        draggerX = Math.round(loadManager.positionX / loadManager.positionMagnitude * 59) + 59
-        draggerY = Math.round(loadManager.positionY / loadManager.positionMagnitude * 59) + 59
-
+        draggerX = Math.round(settingsMirror.positionX / settingsMirror.positionMagnitude * 59) + 59
+        draggerY = Math.round(settingsMirror.positionY / settingsMirror.positionMagnitude * 59) + 59
     })
 
     const updateHowlsAndPositions = () => {
-        loadManager.positionX = ((draggerX - 59) / 59) * loadManager.positionMagnitude;
-        loadManager.positionY = ((draggerY - 59) / 59) * loadManager.positionMagnitude;
+        settingsMirror.positionX = ((draggerX - 59) / 59) * settingsMirror.positionMagnitude;
+        settingsMirror.positionY = ((draggerY - 59) / 59) * settingsMirror.positionMagnitude;
         for(let i of loadManager.preloads){
-            if(i.howlInstance?.howl && loadManager.positional){
-                i.howlInstance.howl.pos(loadManager.positionX, 0, loadManager.positionY);
+            if(i.howlInstance?.howl && settingsMirror.positional){
+                i.howlInstance.howl.pos(settingsMirror.positionX, 0, settingsMirror.positionY);
             }
         }
     }
@@ -59,6 +59,8 @@
             document.removeEventListener("mousemove", dragLogicDesktop);
             document.removeEventListener('mouseup', endDragDesktop)
             dragging = false;
+            saveMirrorValueToStore('positionX')
+            saveMirrorValueToStore('positionY')
         }
     };
 

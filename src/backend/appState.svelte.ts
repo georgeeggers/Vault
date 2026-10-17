@@ -9,7 +9,6 @@ export type AppState = {
     miniPlayer: boolean,
     player: Player,
     projects: PlayerProject[],
-    settings: Settings,
     showSearchResults: boolean,
     popupData: {
         popupShowing: boolean,
@@ -43,12 +42,6 @@ export const appState: AppState = $state({
         }
     },
     projects: [],
-    settings: {
-        lightMode: false,
-        mainHue: 95,
-        coproducer: false,
-        queueDisplaySize: 10,
-    },
     popupData: {
         popupShowing: false,
         popupType: "createNew",

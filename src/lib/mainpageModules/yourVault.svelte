@@ -46,60 +46,66 @@
 
     </div>
     {#if vaultSearchTerm != ""}
-        {@const data = searchForProjects(appState.projects, vaultSearchTerm)}
-        {#each data.projects as project}
-            {#if project.id != "yourVault"}
-                <div class="projectLabel" style='margin: 0px;'>
-                    <div class="imgContainer">
-                        {#if project.thumbnail}
-                            <img alt='bleh' src='{project.thumbnail}'>
-                        {:else}
-                            <PlaceholderImage  />
-                        {/if}
-                    </div>
+        {@const searchResults = searchForProjects(appState.projects, vaultSearchTerm)}
+        {#each searchResults as result}
+            {#if result.dataType == 'project'}
+                {#if result.data.id != "yourVault"}
+                    <div class="projectLabel" style='margin: 0px;'>
+                        <div class="imgContainer">
+                            {#if result.data.thumbnail}
+                                <img alt='bleh' src='{result.data.thumbnail}'>
+                            {:else}
+                                <PlaceholderImage  />
+                            {/if}
+                        </div>
 
-                    <div class="projectLabelText">
-                        <p class='text1'>{project.name}</p>
-                        <p class='text2'>{formatSeconds(project.totalLength, true)}</p>
-                        {#if project.projectType == "single"}
-                            <p class='text2'>Single</p>
-                        {:else}
-                            <p class='text2'>{project.songs.length} tracks</p>
-                        {/if}
-                    </div>
+                        <div class="projectLabelText">
+                            <p class='text1'>{result.data.name}</p>
+                            <p class='text2'>{formatSeconds(result.data.totalLength, true)}</p>
+                            {#if result.data.projectType == "single"}
+                                <p class='text2'>Single</p>
+                            {:else}
+                                <p class='text2'>{result.data.songs.length} tracks</p>
+                            {/if}
+                        </div>
 
-                    <button class="playButton" onclick={() => processClick(project)}>
-                        <div class="hoverPlayPauseButton">
-                            {#if playingProject}
-                                {#if project.id == playingProject.id && loadManager.playing}
-                                    <div class="svgWrapper">
-                                        <Pause size=37 fill='currentColor' strokeWidth={0}/>
-                                    </div>
+                        <button class="playButton" onclick={() => processClick(result.data)}>
+                            <div class="hoverPlayPauseButton">
+                                {#if playingProject}
+                                    {#if result.data.id == playingProject.id && loadManager.playing}
+                                        <div class="svgWrapper">
+                                            <Pause size=37 fill='currentColor' strokeWidth={0}/>
+                                        </div>
+                                    {:else}
+                                        <div class="svgWrapper">
+                                            <Play size=37 fill='currentColor' strokeWidth={0}/>
+                                        </div>        
+                                    {/if}
                                 {:else}
                                     <div class="svgWrapper">
                                         <Play size=37 fill='currentColor' strokeWidth={0}/>
-                                    </div>        
+                                    </div>
                                 {/if}
-                            {:else}
-                                <div class="svgWrapper">
-                                    <Play size=37 fill='currentColor' strokeWidth={0}/>
-                                </div>
-                            {/if}
-                        </div>
-                    </button>
+                            </div>
+                        </button>
 
-                    <button class='songDataButton' onclick={() => beginEdit(project)}>
-                        <div class="svgWrapper">
-                            <PenLine size=16 />
-                        </div>
-                    </button>
-                </div>
+                        <button class='songDataButton' onclick={() => beginEdit(result.data)}>
+                            <div class="svgWrapper">
+                                <PenLine size=16 />
+                            </div>
+                        </button>
+                    </div>
+                {/if}
+            {:else}
+                <ContentDisplay displayType="song" data={result.data}/>
             {/if}
+
+
+
+
         {/each}
 
-        {#each data.songs as songContainer}
-            <ContentDisplay displayType="song" data={songContainer}/>
-        {/each}
+  
 
     {:else}
         {#each appState.projects.toReversed() as project}

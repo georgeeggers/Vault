@@ -5,6 +5,7 @@ import { addNotification, getID } from "./appUtils.svelte"
 import { debug } from "./dev.svelte"
 import { getCurrentQueue, seek, shuffle, startPlaybarTracking, stopPlaybarTracking, stopSeek } from "./playerUtils.svelte"
 import { loadSongData, type PlayerProject, type PlayerSongContainer, type PlayerSongData } from "./sql.svelte"
+import { settingsMirror } from "./settings.svelte"
 
 export type HowlInstanceV2 = {
     howl: null | Howl,
@@ -21,29 +22,16 @@ export type LoadInstance = {
 }
 
 export type LoadManager = {
-    maxSize: number,
     preloads: LoadInstance[],
     currentSong: LoadInstance | null,
-    maxTimeToWaitForLoad: number,
-    retryInterval: number,
     playing: boolean,
-    positional: boolean,
-    positionX: number,
-    positionY: number,
-    positionMagnitude: number,
+
 }
 
 export let loadManager: LoadManager = $state({
-    maxSize: 3,
     preloads: [],
     currentSong: null,
-    maxTimeToWaitForLoad: 10000,
-    retryInterval: 100,
-    playing: false,
-    positional: false,
-    positionX: 0,
-    positionY: 0,
-    positionMagnitude: 1,
+    playing: false
 });
 
 export const getHowlInstanceV2 = (songData: PlayerSongData, songContainer: PlayerSongContainer) => {
@@ -77,11 +65,11 @@ export const getHowlInstanceV2 = (songData: PlayerSongData, songContainer: Playe
         appState.player.sliderProgress = 0;
 
         // when the song ends, just select the next song in the queue
-        playNextSongFromQueue(appState.player.queueManager.shuffle ? appState.player.queueManager.shuffleQueue : appState.player.queueManager.currentQueue);
+        playNextSongFromQueue(getCurrentQueue());
     }).load();
 
-    if(loadManager.positional){
-        howl.pos(loadManager.positionX, 0, loadManager.positionY);
+    if(settingsMirror.positional){
+        howl.pos(settingsMirror.positionX, 0, settingsMirror.positionY);
     }
     return howlContainer;
 }
@@ -103,7 +91,7 @@ export const unloadLeastLikelySong = () => {
 
     let nextSongs: PlayerSongContainer[] = [];
     // remove the ids of everything loaded
-    for(let i = 0; i < loadManager.maxSize - 1; i++){
+    for(let i = 0; i < settingsMirror.maxPreloadSize - 1; i++){
         nextSongs.push(getCurrentQueue()[i]);
     }
 
@@ -128,8 +116,6 @@ export const unloadSong = (songContainer : PlayerSongContainer) => {
         }
         index++;
     }
-
-    appState.player.queueManager.recentlyPlayed.unshift(songContainer);
 
     const p = loadManager.preloads.splice(index, 1)[0];
     if(p){
@@ -167,7 +153,7 @@ export const loadSong = async (songContainer: PlayerSongContainer) => {
         songData: null
     });
     
-    if(loadManager.preloads.length >= loadManager.maxSize){
+    if(loadManager.preloads.length >= settingsMirror.maxPreloadSize){
         unloadLeastLikelySong();
     }
 
@@ -189,7 +175,7 @@ export const loadNextSongsFromQueue = (queue: PlayerSongContainer[]) => {
     if(loadManager.currentSong){
         size = 1;
     }
-    for(let i = 0; i < loadManager.maxSize - size; i++){
+    for(let i = 0; i < settingsMirror.maxPreloadSize - size; i++){
         if(queue[i]){
             loadSong(queue[i]);
         }
@@ -242,6 +228,7 @@ export const stopSong = (song: PlayerSongContainer) => {
 }
 
 export const playSong = (song: PlayerSongContainer) => {
+    addSongToRecentlyPlayed(song);
     for(let i of loadManager.preloads){
         // stop songs other than the one we want
         if(i.song.id != song.id && i.playing){
@@ -276,14 +263,14 @@ export const playSong = (song: PlayerSongContainer) => {
                         clearInterval(intervalID);
                     }
 
-                    if(elapsedTime >= loadManager.maxTimeToWaitForLoad){
+                    if(elapsedTime >= settingsMirror.maxTimeToWaitForLoad){
                         debug("Failed to load song in reasonable time");
                         addNotification('Failed to load song in reasonable time', 'fail');
                         clearInterval(intervalID);
                     }
 
-                    elapsedTime += loadManager.retryInterval;
-                }, loadManager.retryInterval);
+                    elapsedTime += settingsMirror.retryInterval;
+                }, settingsMirror.retryInterval);
             }
         }
     }
@@ -294,7 +281,7 @@ export const playNextSongFromQueue = async (queue: PlayerSongContainer[]) => {
         
         stopSong(loadManager.currentSong.song);
         stopPlaybarTracking();
-        if(loadManager.preloads.length == loadManager.maxSize){
+        if(loadManager.preloads.length == settingsMirror.maxPreloadSize){
             unloadSong(loadManager.currentSong.song);
             loadManager.currentSong = null;
             loadNextSongsFromQueue(queue);
@@ -376,24 +363,32 @@ export const playPause = () => {
     }
 }
 
+export const addSongToRecentlyPlayed = (p: PlayerSongContainer) => {
+
+    if(appState.player.queueManager.recentlyPlayed.length == 0 || appState.player.queueManager.recentlyPlayed[0].id != p.id){
+        console.log("Adding thingy")
+        appState.player.queueManager.recentlyPlayed.unshift(p);
+    } else {
+        console.log("Skipping!")
+    }
+}
+
 export const backTrack = () => {
     if(loadManager.currentSong){
-        if(appState.player.progress > 5){
+        if(appState.player.progress > 5 || appState.player.queueManager.recentlyPlayed.length <= 1){
             seek();
             appState.player.sliderProgress = 0;
             stopSeek();
         } else if(appState.player.queueManager.recentlyPlayed.length > 0){
 
-            const target = appState.player.queueManager.recentlyPlayed.splice(0, 1)[0];
-            playSongInstantly(target)
-
-            // lowk a hack but we ball
-            const target2 = appState.player.queueManager.recentlyPlayed.splice(0, 1)[0];
-            if(appState.player.queueManager.shuffle){
-                appState.player.queueManager.shuffleQueue.unshift(target2);
-            } else {
-                appState.player.queueManager.currentQueue.unshift(target2);
+            if(loadManager.currentSong){
+                stopSong(loadManager.currentSong.song);
             }
+            // the first song on recently played will always be the currently playing song. 
+            getCurrentQueue().unshift(appState.player.queueManager.recentlyPlayed.splice(0, 1)[0]);
+            playSongInstantly( appState.player.queueManager.recentlyPlayed[0])
+
+
 
         }
     }

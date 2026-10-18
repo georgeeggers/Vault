@@ -94,6 +94,16 @@ export const addNotification = (body: string, notifType: string, time = 10000) =
     }, time);
 }
 
+export const createDebounce = (action: any, delay: number) => {
+  let timer: any;
+  return (
+    (args: any) => {
+      clearTimeout(timer);
+      timer = setTimeout(action, delay, args);
+    }
+  )
+}
+
 export const copyText = async (text: string) => {
     await navigator.clipboard.writeText(text);
     addNotification("CSS Copied!", "success");

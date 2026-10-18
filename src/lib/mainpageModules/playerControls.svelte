@@ -35,7 +35,7 @@
                 {/if}
             </button>
 
-            <button id="skip" class='playbarButton' onclick={() => playNextSongFromQueue(appState.player.queueManager.shuffle ? appState.player.queueManager.shuffleQueue : appState.player.queueManager.currentQueue)}>
+            <button id="skip" class='playbarButton' onclick={() => playNextSongFromQueue()}>
                 <div class="svgWrapper">
                     <FastForward size=20 fill='currentColor' strokeWidth={0}/>
                 </div>

@@ -20,7 +20,7 @@ redo queue system to have a seperate user queue and app queue. this way we can e
 !!! 
 
 Recently played queue
-lyric manager
+lyric manager 
 media control
     https://github.com/Taiizor/tauri-plugin-media
 

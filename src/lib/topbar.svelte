@@ -3,9 +3,9 @@
     import { getCurrentWindow } from "@tauri-apps/api/window";
     import { replace} from "svelte-spa-router";
     import { appState, openPopup } from "../backend/appState.svelte";
-    import { searchForProjects } from "../backend/appUtils.svelte";
+    import { addNotification, searchForProjects } from "../backend/appUtils.svelte";
     import { fade, fly } from "svelte/transition";
-    import { loadManager } from "../backend/howlManagers.svelte";
+    import { loadedHowls, loadManager, loadQueue } from "../backend/howlManagers.svelte";
     import ContentDisplay from "./modules/contentDisplay.svelte";
     import App from "../App.svelte";
     const window = getCurrentWindow();
@@ -20,10 +20,15 @@
         }
     })
 
+    const bleh = () => {
+        // @ts-ignore
+        addNotification(`${Howler._howls.length}`, 'success')
+    }
+
 </script>
 
 <div class="topbar" data-tauri-drag-region>
-
+    <button onclick={bleh}>Hiiii :3</button>
     <button class="locationButton"
         onclick={() => replace('/settings')}
     >
@@ -53,6 +58,8 @@
         </div>
         <input bind:value={appState.searchTerm} id='searchBar' autocapitalize='off' autocomplete="off" autocorrect="off" placeholder="Search for anything...">
     </label>
+
+    <p>Bleh: {loadedHowls.length}</p>
 
     {#if appState.showSearchResults}
 

@@ -1,7 +1,7 @@
 import { Howl } from "howler"
 import PlayerControls from "../lib/mainpageModules/playerControls.svelte"
 import { appState } from "./appState.svelte"
-import { addNotification, getID } from "./appUtils.svelte"
+import { addNotification, createDebounce, getID } from "./appUtils.svelte"
 import { debug } from "./dev.svelte"
 import { getCurrentQueue, seek, shuffle, startPlaybarTracking, stopPlaybarTracking, stopSeek } from "./playerUtils.svelte"
 import { loadSongData, type PlayerProject, type PlayerSongContainer, type PlayerSongData } from "./sql.svelte"
@@ -34,6 +34,37 @@ export let loadManager: LoadManager = $state({
     playing: false
 });
 
+export let loadedHowls: {songID: string, howl: Howl, url: string}[] = $state([]);
+
+export const unloadLeakedHowls = () => {
+    for(let i = loadedHowls.length - 1; i >= 0; i--){
+
+        let valid = false;
+
+        for(let preload of loadManager.preloads){
+            if(preload.song.id == loadedHowls[i].songID){
+                valid = true;
+                break;
+            }
+        }
+
+        if(!valid){
+            console.log('cleaning up leaked howl!');
+            let thing: {songID: string, howl: Howl, url: string }|null = loadedHowls.splice(i, 1)[0];
+
+            thing.howl.unload();
+
+            URL.revokeObjectURL(thing.url);
+            thing.url = "";
+
+            thing = null;
+
+
+        }
+
+    }
+}
+
 export const getHowlInstanceV2 = (songData: PlayerSongData, songContainer: PlayerSongContainer) => {
     // if there is no song data, return
     if(!songData.content){
@@ -58,19 +89,22 @@ export const getHowlInstanceV2 = (songData: PlayerSongData, songContainer: Playe
         // only initialize the rest of this when the howl instance is actually loaded
         howlContainer.duration = howl.duration();
         howlContainer.loaded = true;
-        howlContainer.howl = howl;
+        
+        loadedHowls.push({songID: songContainer.id, howl: howl, url: songData.content});
+        unloadLeakedHowls();
     }).on('end', () => {
 
         appState.player.progress = 0;
         appState.player.sliderProgress = 0;
 
         // when the song ends, just select the next song in the queue
-        playNextSongFromQueue(getCurrentQueue());
+        playNextSongFromQueue();
     }).load();
 
     if(settingsMirror.positional){
         howl.pos(settingsMirror.positionX, 0, settingsMirror.positionY);
     }
+    howlContainer.howl = howl;
     return howlContainer;
 }
 
@@ -92,7 +126,10 @@ export const unloadLeastLikelySong = () => {
     let nextSongs: PlayerSongContainer[] = [];
     // remove the ids of everything loaded
     for(let i = 0; i < settingsMirror.maxPreloadSize - 1; i++){
-        nextSongs.push(getCurrentQueue()[i]);
+        const thing = getCurrentQueue()[i];
+        if(thing){
+            nextSongs.push(thing);
+        }
     }
 
     // fetch next X songs in queue, and current playing song
@@ -101,7 +138,6 @@ export const unloadLeastLikelySong = () => {
             continue;
         }
 
-        console.log("unloading ", i.song.name);
         unloadSong(i.song);
         break;
     }
@@ -109,6 +145,13 @@ export const unloadLeastLikelySong = () => {
 }
 
 export const unloadSong = (songContainer : PlayerSongContainer) => {
+    const s = loadQueue.indexOf(songContainer.name);
+    if(s != -1){
+        loadQueue.splice(s, 1);
+    } else {
+        addNotification('Attemping to unload song that doesnt exist', 'fail');
+    }
+
     let index = 0;
     for(let i of loadManager.preloads){
         if(i.song.id == songContainer.id){
@@ -117,16 +160,28 @@ export const unloadSong = (songContainer : PlayerSongContainer) => {
         index++;
     }
 
-    const p = loadManager.preloads.splice(index, 1)[0];
+    let p = loadManager.preloads.splice(index, 1)[0];
     if(p){
-        if(p.howlInstance){
-            p.howlInstance.howl?.unload();
-            p.howlInstance.howl = null;
-            p.howlInstance = null;
+
+        for(let i of loadedHowls){
+            if(i.songID == songContainer.id){
+                let thing: {songID: string, howl: Howl }|null = loadedHowls.splice(loadedHowls.indexOf(i), 1)[0];
+
+                thing.howl.unload();
+                thing = null;
+            }
         }
+
+        const howl = p.howlInstance?.howl;
+
+        // Clear application references even if no Howl exists.
+        p.howlInstance = null;
+
+        howl?.unload();
 
         if(p.songData){
             URL.revokeObjectURL(p.songData.content);
+            p.songData.content = "";
         }
     }
 
@@ -140,11 +195,15 @@ export const isSongAlreadyLoaded = (songContainer: PlayerSongContainer) => {
     }
     return false;
 }
+export let loadQueue: string[] = $state([]);
 
 export const loadSong = async (songContainer: PlayerSongContainer) => {
     if(isSongAlreadyLoaded(songContainer)){
         return;
     }
+
+    loadQueue.push(songContainer.name);
+
     const snapshot =  $state.snapshot(songContainer);
     let temp: LoadInstance = $state({
         playing: false,
@@ -171,7 +230,7 @@ export const loadSong = async (songContainer: PlayerSongContainer) => {
 
 // this will not actually remove songs from the queue, and will just try to load enough items from the queue to fill the loadManager.preloads array
 export const loadNextSongsFromQueue = (queue: PlayerSongContainer[]) => {
-    let size = 0;
+    let size = 0; 
     if(loadManager.currentSong){
         size = 1;
     }
@@ -196,18 +255,17 @@ export const loadQueueFromProjectV2 = async (project: PlayerProject) => {
     if(appState.player.queueManager.shuffle){
         appState.player.queueManager.shuffleQueue = shuffle([...appState.player.queueManager.currentQueue]);
         loadNextSongsFromQueue(appState.player.queueManager.shuffleQueue);
-        playNextSongFromQueue(appState.player.queueManager.shuffleQueue);
+        playNextSongFromQueue();
     } else {
         loadNextSongsFromQueue(appState.player.queueManager.currentQueue);
-        playNextSongFromQueue(appState.player.queueManager.currentQueue);
+        playNextSongFromQueue();
     }
 
 
 }
 
+
 export const selectSong = (songContainer: PlayerSongContainer) => {
-    // load the container. This wont do anything if the data is already loaded :)
-    loadSong(songContainer);
     for(let i of loadManager.preloads){
         if(i.song.id == songContainer.id){
             loadManager.currentSong = i;
@@ -264,9 +322,10 @@ export const playSong = (song: PlayerSongContainer) => {
                     }
 
                     if(elapsedTime >= settingsMirror.maxTimeToWaitForLoad){
-                        debug("Failed to load song in reasonable time");
+                        debug(`Failed to load song ${song.name} in reasonable time`);
                         addNotification('Failed to load song in reasonable time', 'fail');
                         clearInterval(intervalID);
+                        unloadSong(song);
                     }
 
                     elapsedTime += settingsMirror.retryInterval;
@@ -276,7 +335,9 @@ export const playSong = (song: PlayerSongContainer) => {
     }
 }
 
-export const playNextSongFromQueue = async (queue: PlayerSongContainer[]) => {
+const loadSongDebounce = createDebounce(loadNextSongsFromQueue, 500);
+
+export const playNextSongFromQueue = async (queueDebouce: boolean = false) => {
     if(loadManager.currentSong){
         
         stopSong(loadManager.currentSong.song);
@@ -284,12 +345,12 @@ export const playNextSongFromQueue = async (queue: PlayerSongContainer[]) => {
         if(loadManager.preloads.length == settingsMirror.maxPreloadSize){
             unloadSong(loadManager.currentSong.song);
             loadManager.currentSong = null;
-            loadNextSongsFromQueue(queue);
+            loadNextSongsFromQueue(getCurrentQueue());
+
         }
-        
     }
 
-    const current = queue.shift();
+    const current = getCurrentQueue().shift();
     if(current){
 
         appState.player.duration = current.duration;
@@ -366,10 +427,7 @@ export const playPause = () => {
 export const addSongToRecentlyPlayed = (p: PlayerSongContainer) => {
 
     if(appState.player.queueManager.recentlyPlayed.length == 0 || appState.player.queueManager.recentlyPlayed[0].id != p.id){
-        console.log("Adding thingy")
         appState.player.queueManager.recentlyPlayed.unshift(p);
-    } else {
-        console.log("Skipping!")
     }
 }
 

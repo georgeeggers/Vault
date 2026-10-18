@@ -59,6 +59,11 @@ let db: Database | null = $state(null)
 const loadDb = async () => {
     if(!db){
         db = await Database.load("sqlite:data.db");
+
+        // indexing massively speeds everything up. big W
+        await db.execute(`CREATE INDEX IF NOT EXISTS idx_songContainers_parentProject ON songContainer(parentProject)`);
+        await db.execute(`CREATE INDEX IF NOT EXISTS idx_songData_parentContainer ON songData(parentContainer)`);
+        // genuinely it's absurd how these two simple statements make everything like 10x faster. Thats not even hyperbole. Deleting goes from like 50 seconds to half a second. Crazy work. I love life
     }
 }
 
@@ -375,7 +380,9 @@ export const deleteSongsIfTheyExist = async (songIDs: string[]) => {
 export const deleteProject = async (projectID: string) => {
     await loadDb();
     if(db){
+        console.log("Deleting in function")
         await db.execute("DELETE FROM projects WHERE id = $1", [projectID]);
+        console.log("Deleted in function");
     }
 }
 

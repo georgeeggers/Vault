@@ -301,7 +301,9 @@
         } else {
             lockPopup()
             deleting = true;
+            console.log("deleting");
             await deleteProject(projectData.projectId);
+            console.log('deleted');
             unlockPopup();
             closePopup();
             addNotification("Project Deleted!", 'succcess');

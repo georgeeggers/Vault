@@ -9,15 +9,23 @@
     import { fly } from "svelte/transition";
     import { X } from "@lucide/svelte";
     import { onDestroy, onMount } from "svelte";
-    import { loadManager, stopSong, unloadAllSongs } from "./backend/howlManagers.svelte";
+    import { loadManager, stopSong, unloadAllSongs, unloadLeakedHowls } from "./backend/howlManagers.svelte";
     import { getTotalNumberOfSongData, loadProjects } from "./backend/sql.svelte";
     import { getTheme, initSettings } from "./backend/settings.svelte";
 
+
+    let initializing = $state(true);
+    let initBlocker = $state(true);
     onMount(async () => {
       console.log("We just loading here. Switch out for another place when we eventually get onboarding working");
       console.log(await getTotalNumberOfSongData());
       await initSettings();
       await loadProjects();
+      
+      initializing = false;
+      setTimeout(() => {
+        initBlocker = false;
+      }, 1000)
     })
 
     onDestroy(() => {
@@ -26,9 +34,16 @@
         }
         loadManager.currentSong = null;
         unloadAllSongs();
+        unloadLeakedHowls();
     })
 
 </script>
+
+{#if initBlocker}
+  <div class="initializing {initializing ? "" : "close"}">
+
+  </div>
+{/if}
 
 <div class="globalArea" style='{getTheme()}'>
   {#if !appState.miniPlayer}
@@ -71,6 +86,28 @@
 </div>
 
 <style>
+
+  .initializing {
+    width: 100vw;
+    height: 100vh;
+    position: fixed;
+    left: 0px;
+    top: 0px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--bg0);
+    z-index: 100;
+
+    clip-path: circle(100% at 50% 50%);
+    transition: clip-path 1s;
+  }
+
+  .close {
+    clip-path: circle(0% at 50% 50%);
+  }
 
   .playbarContainer {
     width: 100%;

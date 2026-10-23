@@ -5,6 +5,7 @@ import { debug } from "./dev.svelte"
 import { type PlayerSongContainer } from "./sql.svelte"
 import { replace } from "svelte-spa-router"
 import { loadManager, loadNextSongsFromQueue, loadSong } from "./howlManagers.svelte"
+import { settingsMirror } from "./settings.svelte"
 
 export type QueueManager = {
     currentQueue: PlayerSongContainer[],
@@ -33,23 +34,33 @@ export const formatSeconds = (input: number, mode: boolean = false) => {
 
 }
 
-
-export const startPlaybarTracking = () => {
-    if(loadManager.currentSong){
-        if(loadManager.currentSong.howlInstance?.howl){
-            appState.player.duration = loadManager.currentSong.howlInstance.howl.duration();
-            appState.player.progress = loadManager.currentSong.howlInstance.howl.seek();
-            appState.player.intervalID = setInterval(() => {
-                if(loadManager.currentSong){
-                    if(loadManager.currentSong.howlInstance?.howl){
-                        appState.player.progress = loadManager.currentSong.howlInstance.howl.seek();
-                        appState.player.sliderProgress = appState.player.progress * 100;
-                    }
+const bleh = () => {
+    if(loadManager.currentSong?.howlInstance?.howl){
+        appState.player.duration = loadManager.currentSong.howlInstance.howl.duration();
+        appState.player.progress = loadManager.currentSong.howlInstance.howl.seek();
+        appState.player.intervalID = setInterval(() => {
+            if(loadManager.currentSong){
+                if(loadManager.currentSong.howlInstance?.howl){
+                    appState.player.progress = loadManager.currentSong.howlInstance.howl.seek();
+                    appState.player.sliderProgress = appState.player.progress * 100;
                 }
-            }, 1000);
-        }
- 
+            }
+        }, 1000);
     }
+}
+export const startPlaybarTracking = () => {
+    if(loadManager.currentSong?.howlInstance?.loaded){
+        bleh();
+    } else {
+        let startTrackerTimeout = setInterval(() => {
+            if(loadManager.currentSong?.howlInstance?.loaded){
+                bleh();
+                clearInterval(startTrackerTimeout);
+            }
+        }, settingsMirror.retryInterval);
+    }
+
+ 
 }
 
 export const stopPlaybarTracking = () => {

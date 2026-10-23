@@ -21,8 +21,7 @@
     })
 
 </script>
-
-<div class="topbar" data-tauri-drag-region>
+<div class="topbar" style={!minimal ? "border-bottom: 1px solid var(--bg2);" : ""} data-tauri-drag-region>
     {#if !minimal}
         <button class="locationButton"
             onclick={() => replace('/settings')}
@@ -143,7 +142,6 @@
         align-items: center;
         padding: 10px;
         background-color: var(--bg0);
-        border-bottom: 1px solid var(--bg2);
     }
 
     .locationButton {

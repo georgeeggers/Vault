@@ -88,6 +88,9 @@ export const getHowlInstanceV2 = (songData: PlayerSongData, songContainer: Playe
     }).on('load', () => {
         // only initialize the rest of this when the howl instance is actually loaded
         howlContainer.duration = howl.duration();
+        if(songData.id == loadManager.currentSong?.song.id){
+            appState.player.duration = howlContainer.duration;
+        }
         howlContainer.loaded = true;
         
         loadedHowls.push({songID: songContainer.id, howl: howl, url: songData.content});
@@ -403,8 +406,6 @@ export const playSongInstantly = (songContainer: PlayerSongContainer) => {
             stopSong(loadManager.currentSong.song); 
         }
     }
-    appState.player.duration = 0;
-    appState.player.sliderProgress = 0;
 
     stopPlaybarTracking();
     loadSong(songContainer);

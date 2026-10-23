@@ -14,17 +14,26 @@
     import { getTheme, initSettings } from "./backend/settings.svelte";
 
 
-    let initializing = $state(true);
     let initBlocker = $state(true);
+    let initBlockerStage = $state(0);
+
+  const introTime = 125;
+  const introRings = 3;
+
     onMount(async () => {
       console.log("We just loading here. Switch out for another place when we eventually get onboarding working");
       console.log(await getTotalNumberOfSongData());
       await initSettings();
       await loadProjects();
-      initializing = false;
+      let iid = setInterval(() => {
+        initBlockerStage++;
+        if(initBlockerStage == introRings + 1){
+          clearInterval(iid);
+        }
+      }, introTime)
       setTimeout(() => {
         initBlocker = false;
-      }, 1000);
+      }, 1000 + (introRings + 1) * introTime);
 
     })
 
@@ -39,16 +48,26 @@
 
 </script>
 
-{#if initBlocker}
 
-  <div class="initializing {initializing ? "" : "close"}">
+
+<div class="globalArea" style='{getTheme()}'>
+
+{#if initBlocker}
+  {#each {length: introRings} as _, i}
+    <div class="initializing {initBlockerStage < introRings + 1 - i ? "" : "close"}"
+      style='background-color: var(--main{introRings + 1 - i});'
+    ></div>
+  {/each}
+
+  <div class="initializing {initBlockerStage < 1 ? "" : "close"}">
+    <p class='oldLondon introText'>Vault</p>
     <div class="minimalTopbar">
       <Topbar minimal={true} />
     </div>
   </div>
 {/if}
 
-<div class="globalArea" style='{getTheme()}'>
+
   {#if !appState.miniPlayer}
     <div class="topbarContainer">
       <Topbar />
@@ -89,6 +108,10 @@
 </div>
 
 <style>
+
+  .introText {
+    font-size: 10em;
+  }
 
   .minimalTopbar {
     position: fixed;

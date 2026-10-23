@@ -6,6 +6,8 @@
     import { searchForProjects } from "../backend/appUtils.svelte";
     import { loadManager } from "../backend/howlManagers.svelte";
     import ContentDisplay from "./modules/contentDisplay.svelte";
+
+    let { minimal = false } = $props();
     const window = getCurrentWindow();
 
     const ICON_SIZE = 24;
@@ -21,60 +23,62 @@
 </script>
 
 <div class="topbar" data-tauri-drag-region>
-    <button class="locationButton"
-        onclick={() => replace('/settings')}
-    >
-        <div class="svgWrapper">
-            <Settings2 size={ICON_SIZE} />
-        </div>
-    </button>
-
-    <button class="locationButton"
-        onclick={() => replace('/')}
-    >
-        <div class="svgWrapper">
-            <Home size={ICON_SIZE} />
-        </div>
-    </button>
-
-
-    <button class="locationButton" style='margin-left: 40px;' onclick={() => openPopup("createNew")}>
-        <div class="svgWrapper">
-            <Upload size={ICON_SIZE} />
-        </div>
-    </button>
-
-    <label class="searchBarContainer" for='searchBar'>
-        <div class="svgWrapper">
-            <Search size={ICON_SIZE} />
-        </div>
-        <input bind:value={appState.searchTerm} id='searchBar' autocapitalize='off' autocomplete="off" autocorrect="off" placeholder="Search for anything...">
-    </label>
-
-    {#if appState.showSearchResults}
-
-        <label class="searchBlocker"
-            style="{loadManager.currentSong && !appState.miniPlayer ? "height: calc(100% - 140px);" : "height: calc(100% - 60px);"}"
-
+    {#if !minimal}
+        <button class="locationButton"
+            onclick={() => replace('/settings')}
         >
-            <button class='invis' onclick={() => {
-                appState.showSearchResults = false;
-            }}>close</button>
+            <div class="svgWrapper">
+                <Settings2 size={ICON_SIZE} />
+            </div>
+        </button>
+
+        <button class="locationButton"
+            onclick={() => replace('/')}
+        >
+            <div class="svgWrapper">
+                <Home size={ICON_SIZE} />
+            </div>
+        </button>
+
+
+        <button class="locationButton" style='margin-left: 40px;' onclick={() => openPopup("createNew")}>
+            <div class="svgWrapper">
+                <Upload size={ICON_SIZE} />
+            </div>
+        </button>
+
+        <label class="searchBarContainer" for='searchBar'>
+            <div class="svgWrapper">
+                <Search size={ICON_SIZE} />
+            </div>
+            <input bind:value={appState.searchTerm} id='searchBar' autocapitalize='off' autocomplete="off" autocorrect="off" placeholder="Search for anything...">
         </label>
 
-        <div class="searchResults scrollOverflow"
-            style="height: min({searchResults.length * 70 + 12}px, 80vh);"
-        >
+        {#if appState.showSearchResults}
 
-            {#each searchResults as result, i}
-                <!-- We have to use this conditional because typescript yells at me and... it scares me :( -->
-                {#if result.dataType == 'project'}
-                    <ContentDisplay data={result.data} displayType="project"/>
-                {:else}
-                    <ContentDisplay data={result.data} displayType="song" />
-                {/if}
-            {/each}
-        </div>
+            <label class="searchBlocker"
+                style="{loadManager.currentSong && !appState.miniPlayer ? "height: calc(100% - 140px);" : "height: calc(100% - 60px);"}"
+
+            >
+                <button class='invis' onclick={() => {
+                    appState.showSearchResults = false;
+                }}>close</button>
+            </label>
+
+            <div class="searchResults scrollOverflow"
+                style="height: min({searchResults.length * 70 + 12}px, 80vh);"
+            >
+
+                {#each searchResults as result, i}
+                    <!-- We have to use this conditional because typescript yells at me and... it scares me :( -->
+                    {#if result.dataType == 'project'}
+                        <ContentDisplay data={result.data} displayType="project"/>
+                    {:else}
+                        <ContentDisplay data={result.data} displayType="song" />
+                    {/if}
+                {/each}
+            </div>
+        {/if}
     {/if}
 
     <button class='windowControlButton' onclick={window.minimize} style='margin-left: auto;'>

@@ -21,11 +21,11 @@
       console.log(await getTotalNumberOfSongData());
       await initSettings();
       await loadProjects();
-      
       initializing = false;
       setTimeout(() => {
         initBlocker = false;
-      }, 1000)
+      }, 1000);
+
     })
 
     onDestroy(() => {
@@ -40,8 +40,11 @@
 </script>
 
 {#if initBlocker}
-  <div class="initializing {initializing ? "" : "close"}">
 
+  <div class="initializing {initializing ? "" : "close"}">
+    <div class="minimalTopbar">
+      <Topbar minimal={true} />
+    </div>
   </div>
 {/if}
 
@@ -86,6 +89,13 @@
 </div>
 
 <style>
+
+  .minimalTopbar {
+    position: fixed;
+    top: 0px;
+    left: 0px;
+    width: 100vw;
+  }
 
   .initializing {
     width: 100vw;
